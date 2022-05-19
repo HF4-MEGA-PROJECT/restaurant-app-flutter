@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_app_flutter/screens/groups.dart';
 import 'package:restaurant_app_flutter/screens/loginscreen.dart';
 
 void main() {
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const MainPage(),
         '/login': (context) => const LoginPage(),
+        '/groups': (context) => const GroupsPage(),
       },
     );
   }
@@ -45,7 +47,10 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _submitForm() {
-
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const GroupsPage()),
+    );
   }
 
   @override
