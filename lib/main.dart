@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app_flutter/screens/groups.dart';
-import 'package:restaurant_app_flutter/screens/loginscreen.dart';
+import 'package:hive_flutter/adapters.dart';
 
-void main() {
+import 'package:restaurant_app_flutter/screens/login.dart';
+import 'package:restaurant_app_flutter/screens/qr.dart';
+import 'package:restaurant_app_flutter/services/auth.dart';
+import 'package:restaurant_app_flutter/screens/groups.dart';
+
+bool _isAuthenticated = false;
+
+Future<void> main() async {
+  await Hive.initFlutter();
+
+  var box = await Hive.openBox('myBox');
+
+  if (box.containsKey(AuthService.bearerTokenKey)) {
+    _isAuthenticated =
+        await AuthService(box.get(AuthService.bearerTokenKey)).verifyToken();
+  }
+
   runApp(const MyApp());
 }
 
@@ -16,11 +31,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      initialRoute: MainPage.route,
+      initialRoute: '/',
       routes: {
-        '/': (context) => const MainPage(),
-        '/login': (context) => const LoginPage(),
         '/groups': (context) => const GroupsPage(),
+        '/': (context) => _isAuthenticated
+            ? const MainPage()
+            : const LoginPage(bearerToken: ''),
+        '/qr': (context) => const QRPage()
       },
     );
   }
@@ -36,56 +53,20 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  String bearerToken = '';
-
-  void _scanQRCode() {
-    /*Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const BarcodeScannerWithController(),
-      ),
-    );*/
-  }
-
-  void _submitForm() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const GroupsPage()),
-    );
-  }
-
-  @override
-  void initState() {
-
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: Center(
-        child: Form(
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Enter the bearer token or scan the qr code'
-                ),
-              ),
-              ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text('Submit')
-              )
-            ],
-          )
-        )
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _scanQRCode,
-        tooltip: 'Scan QR code',
-        child: const Icon(Icons.camera_alt),
-      ),
-    );
+    return SafeArea(
+        child: Scaffold(
+            body: Center(
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(height: 10),
+            Text('Loading...',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ]),
+    )));
   }
 }
