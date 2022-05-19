@@ -25,11 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     if (await AuthService(widget.bearerToken).verifyToken()) {
       Hive.box('myBox').put(AuthService.bearerTokenKey, widget.bearerToken);
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const MainPage(),
-        ),
-      );
+      Navigator.of(context).pushReplacementNamed("/groups");
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
