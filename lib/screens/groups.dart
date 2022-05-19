@@ -14,16 +14,24 @@ class _GroupsPageState extends State<GroupsPage> {
   String bearerToken = '';
   String defaultText = 'No groups yet';
   int groupsAmount = 0;
+  final List<Widget> _groupList = [];
 
-  void _addGroup() {
-    groupsAmount += 1;
-
-
+  Widget _group() {
+    return ElevatedButton.icon(
+      onPressed: _goToGroup,
+      label: const Text('Group' 'N', style: TextStyle(fontSize: 15.0)),
+      icon: const Icon(Icons.edit),
+    );
   }
 
-  void _goToGroup() {}
+  void _addGroupToList() {
+    setState(() {
+      groupsAmount += 1;
+      _groupList.add(_group());
+    });
+  }
 
-  Future<void> _showMyDialog() async {
+  Future<void> _goToGroup() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -33,7 +41,7 @@ class _GroupsPageState extends State<GroupsPage> {
           content: SingleChildScrollView(
             child: ListBody(
               children: const <Widget>[
-                Text("You are about to add group N")
+                Text("You are about to add group N"),
               ],
             ),
           ),
@@ -46,7 +54,41 @@ class _GroupsPageState extends State<GroupsPage> {
             ),
             TextButton(
               child: const Text('Add group'),
-              onPressed: _addGroup,
+              onPressed: _addGroupToList,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _addNewGroup() async {
+    String dropdownValue = 'One';
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add a new group'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text("Add amount of people for this group"),
+
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Add group'),
+              onPressed: _addGroupToList,
             ),
           ],
         );
@@ -58,38 +100,23 @@ class _GroupsPageState extends State<GroupsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Groups"),
+        title: const Text('Groups'),
       ),
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          int count = 2;
-          if (orientation == Orientation.landscape) {
-            count = 3;
-          }
-          if (groupsAmount < 1) {
-            return Center(
-              child: Text(
-                defaultText,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 40),
-              ),
-            );
-          } else {
-            return GridView.count(
-              crossAxisCount: count,
-              children: <Widget>[
-                ElevatedButton.icon(
-                  onPressed: _goToGroup,
-                  label: const Text('Group 1', style: TextStyle(fontSize: 15.0)),
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            );
-          }
-        },
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 200,
+                childAspectRatio: 3 / 2,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20),
+            itemCount: _groupList.length,
+            itemBuilder: (BuildContext ctx, index) {
+              return _groupList[index];
+            }),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showMyDialog,
+        onPressed: _addNewGroup,
         tooltip: 'Add group',
         child: const Icon(Icons.add),
       ),
