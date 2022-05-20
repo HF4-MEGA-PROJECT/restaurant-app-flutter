@@ -22,16 +22,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Cafe Vesuvius',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        colorScheme: const ColorScheme.light(
+          primary: Colors.red,
+          onPrimary: Colors.white,
+          secondary: Colors.red,
+          onSecondary: Colors.white,
+          surface: Colors.red,
+          onSurface: Colors.white
+        ),
       ),
-      initialRoute: '/',
+      darkTheme: ThemeData(
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.red,
+          onPrimary: Colors.white,
+          secondary: Colors.red,
+          onSecondary: Colors.white,
+          surface: Colors.red,
+          onSurface: Colors.white
+        ),
+      ),
+      initialRoute: _isAuthenticated ? '/groups' : '/login',
       routes: {
+        '/login': (context) => const LoginPage(bearerToken: ''),
         '/groups': (context) => const GroupsPage(),
-        '/': (context) => _isAuthenticated
-            ? const GroupsPage()
-            : const LoginPage(bearerToken: ''),
         '/qr': (context) => const QRPage()
       },
     );

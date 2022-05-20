@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:hive_flutter/adapters.dart';
 
-import 'package:restaurant_app_flutter/services/dioclient.dart';
+import 'package:restaurant_app_flutter/services/dio_client.dart';
 
 class AuthService {
   static String bearerTokenKey = 'bearer_token';

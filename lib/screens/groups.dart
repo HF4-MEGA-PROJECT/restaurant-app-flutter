@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_app_flutter/widgets/custom_bottom_navigation_bar.dart';
 
 class GroupsPage extends StatefulWidget {
   static const String route = '/groups';
@@ -117,6 +118,7 @@ class _GroupsPageState extends State<GroupsPage> {
         tooltip: 'Add group',
         child: const Icon(Icons.add),
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(context: context),
     );
   }
 }

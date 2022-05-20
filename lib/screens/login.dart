@@ -85,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
         onPressed: _scanQRCode,
         tooltip: 'Scan QR code',
         child: const Icon(Icons.camera_alt),
-      ),
+      )
     );
   }
 }
