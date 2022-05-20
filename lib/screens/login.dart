@@ -17,12 +17,14 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
+  String bearerToken = '';
+
   void _scanQRCode() {
     Navigator.of(context).pushNamed('/qr');
   }
 
   Future<void> _submitForm() async {
-    if (await AuthService(widget.bearerToken).verifyToken()) {
+    if (await AuthService(bearerToken).verifyToken()) {
       Hive.box('myBox').put(AuthService.bearerTokenKey, widget.bearerToken);
 
       Navigator.of(context).pushReplacement(
@@ -44,6 +46,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void initState() {
+    bearerToken = widget.bearerToken;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -62,9 +70,11 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: const InputDecoration(
                           hintText:
                               'Enter the bearer token or scan the qr code'),
-                      initialValue: widget.bearerToken,
-                      validator: (value) {
-                        return 'Invalid token';
+                      initialValue: bearerToken,
+                      onChanged: (value) {
+                        setState(() {
+                          bearerToken = value;
+                        });
                       },
                     ),
                     const SizedBox(height: 10),
