@@ -4,6 +4,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:restaurant_app_flutter/screens/login.dart';
 import 'package:restaurant_app_flutter/screens/qr.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
+import 'package:restaurant_app_flutter/screens/groups.dart';
 
 bool _isAuthenticated = false;
 
@@ -32,8 +33,9 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
+        '/groups': (context) => const GroupsPage(),
         '/': (context) => _isAuthenticated
-            ? const MainPage()
+            ? const GroupsPage()
             : const LoginPage(bearerToken: ''),
         '/qr': (context) => const QRPage()
       },
@@ -41,30 +43,3 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainPage extends StatefulWidget {
-  static const String route = '/';
-
-  const MainPage({Key? key}) : super(key: key);
-
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
-
-class _MainPageState extends State<MainPage> {
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
-            body: Center(
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            CircularProgressIndicator(),
-            SizedBox(height: 10),
-            Text('Loading...',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          ]),
-    )));
-  }
-}
