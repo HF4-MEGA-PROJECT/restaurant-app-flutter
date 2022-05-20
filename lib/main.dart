@@ -11,12 +11,7 @@ bool _isAuthenticated = false;
 Future<void> main() async {
   await Hive.initFlutter();
 
-  var box = await Hive.openBox('myBox');
-
-  if (box.containsKey(AuthService.bearerTokenKey)) {
-    _isAuthenticated =
-        await AuthService(box.get(AuthService.bearerTokenKey)).verifyToken();
-  }
+  _isAuthenticated = await AuthService().isAuthenticated();
 
   runApp(const MyApp());
 }

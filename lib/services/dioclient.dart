@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:hive_flutter/adapters.dart';
+
 import 'package:restaurant_app_flutter/services/auth.dart';
 
 class DioClient {
@@ -11,8 +11,7 @@ class DioClient {
     receiveTimeout: 5000,
     headers: {
       "Accept": 'application/json',
-      'Authorization': 'Bearer ' +
-          Hive.box('myBox').get(AuthService.bearerTokenKey, defaultValue: '')
+      'Authorization': 'Bearer ' + AuthService().getBearerToken()
     },
   );
 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:restaurant_app_flutter/main.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,10 +22,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _submitForm() async {
-    if (await AuthService(bearerToken).verifyToken()) {
-      Hive.box('myBox').put(AuthService.bearerTokenKey, widget.bearerToken);
+    if (await AuthService().verifyToken(bearerToken)) {
+      AuthService().saveBearerToken(bearerToken);
 
-      Navigator.of(context).pushReplacementNamed("/groups");
+      Navigator.of(context).pushReplacementNamed('/groups');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

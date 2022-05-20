@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app_flutter/screens/Groups.dart';
 
 class GroupsPage extends StatefulWidget {
   static const String route = '/groups';
@@ -63,8 +62,6 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<void> _addNewGroup() async {
-    String dropdownValue = 'One';
-
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
