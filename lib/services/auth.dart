@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:restaurant_app_flutter/models/user.dart';
 
 import 'package:restaurant_app_flutter/services/dio_client.dart';
 
@@ -18,6 +21,17 @@ class AuthService {
     return true;
   }
 
+  Future<User> getUser() async {
+    try {
+      var response = await DioClient().dio.get<Map<String, dynamic>>('/user');
+
+      return User.fromJson(response.data!);
+    } catch (e) {
+      log('Failed getting user!', error: e);
+      rethrow;
+    }
+  }
+
   Future<bool> isAuthenticated() async {
     var box = await Hive.openBox('myBox');
 
@@ -34,5 +48,9 @@ class AuthService {
 
   void saveBearerToken(String bearerToken) {
     Hive.box('myBox').put(bearerTokenKey, bearerToken);
+  }
+
+  void deleteBearerToken() {
+    Hive.box('myBox').delete(AuthService.bearerTokenKey);
   }
 }
