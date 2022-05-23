@@ -1,18 +1,17 @@
 import 'package:dio/dio.dart';
-import 'package:hive_flutter/adapters.dart';
+
 import 'package:restaurant_app_flutter/services/auth.dart';
 
 class DioClient {
-  static const baseURL = "https://restaurant-backend.binau.dev/api";
+  static const baseURL = 'https://restaurant-backend.binau.dev/api';
 
   static BaseOptions baseOptions = BaseOptions(
     baseUrl: baseURL,
     connectTimeout: 5000,
     receiveTimeout: 5000,
     headers: {
-      "Accept": 'application/json',
-      'Authorization': 'Bearer ' +
-          Hive.box('myBox').get(AuthService.bearerTokenKey, defaultValue: '')
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ' + AuthService().getBearerToken()
     },
   );
 

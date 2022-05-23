@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 
+import 'package:restaurant_app_flutter/screens/app.dart';
 import 'package:restaurant_app_flutter/screens/login.dart';
 import 'package:restaurant_app_flutter/screens/qr.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
-import 'package:restaurant_app_flutter/screens/groups.dart';
 
 bool _isAuthenticated = false;
 
 Future<void> main() async {
   await Hive.initFlutter();
 
-  var box = await Hive.openBox('myBox');
-
-  if (box.containsKey(AuthService.bearerTokenKey)) {
-    _isAuthenticated =
-        await AuthService(box.get(AuthService.bearerTokenKey)).verifyToken();
-  }
+  _isAuthenticated = await AuthService().isAuthenticated();
 
   runApp(const MyApp());
 }
@@ -27,19 +22,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Cafe Vesuvius',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        colorScheme: const ColorScheme.light(
+            primary: Colors.red,
+            onPrimary: Colors.white,
+            secondary: Colors.red,
+            onSecondary: Colors.white,
+            surface: Colors.red,
+            onSurface: Colors.white),
       ),
-      initialRoute: '/',
+      darkTheme: ThemeData(
+        colorScheme: const ColorScheme.dark(
+            primary: Colors.red,
+            onPrimary: Colors.white,
+            secondary: Colors.red,
+            onSecondary: Colors.white,
+            surface: Colors.red,
+            onSurface: Colors.white),
+      ),
+      initialRoute: _isAuthenticated ? '/app' : '/login',
       routes: {
-        '/groups': (context) => const GroupsPage(),
-        '/': (context) => _isAuthenticated
-            ? const GroupsPage()
-            : const LoginPage(bearerToken: ''),
-        '/qr': (context) => const QRPage()
+        '/login': (context) => const LoginPage(),
+        '/qr': (context) => const QRPage(),
+        '/app': (context) => App()
       },
     );
   }
 }
-
