@@ -50,46 +50,51 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Login'),
-              automaticallyImplyLeading: false,
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                  child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          TextFormField(
-                            decoration: const InputDecoration(
-                                hintText:
-                                    'Enter the bearer token or scan the qr code'),
-                            initialValue: bearerToken,
-                            onChanged: (value) {
-                              setState(() {
-                                bearerToken = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: _submitForm,
-                            child: const Text('Submit'),
-                            style: ElevatedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(50)),
-                          )
-                        ],
-                      ))),
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: _scanQRCode,
-              tooltip: 'Scan QR code',
-              child: const Icon(Icons.camera_alt),
-            )));
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Login'),
+          automaticallyImplyLeading: false,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      hintText: 'Enter the bearer token or scan the qr code'
+                    ),
+                    initialValue: bearerToken,
+                    onChanged: (value) {
+                      setState(() {
+                        bearerToken = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _submitForm,
+                    child: const Text('Log in'),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50)
+                    ),
+                  )
+                ],
+              )
+            )
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _scanQRCode,
+          tooltip: 'Scan QR code',
+          child: const Icon(Icons.camera_alt),
+        )
+      )
+    );
   }
 }

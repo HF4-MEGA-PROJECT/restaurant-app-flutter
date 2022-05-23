@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import 'package:restaurant_app_flutter/screens/app.dart';
@@ -12,6 +13,8 @@ Future<void> main() async {
   await Hive.initFlutter();
 
   _isAuthenticated = await AuthService().isAuthenticated();
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   runApp(const MyApp());
 }
