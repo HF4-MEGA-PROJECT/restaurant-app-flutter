@@ -11,15 +11,17 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  String bearerToken = '';
   String defaultText = 'No groups yet';
   int groupsAmount = 0;
   final List<Widget> _groupList = [];
 
+  final List<int> _numbers = [1,2,3,4,5,6,7,8,9];
+  int? _selectedNumber = 0;
+
   Widget _group() {
     return ElevatedButton.icon(
       onPressed: _goToGroup,
-      label: const Text('Group' 'N', style: TextStyle(fontSize: 15.0)),
+      label: const Text('Group ' 'N' '\n\n cum', style: TextStyle(fontSize: 15.0)),
       icon: const Icon(Icons.edit),
     );
   }
@@ -32,68 +34,7 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<void> _goToGroup() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add a new group'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: const <Widget>[
-                Text("You are about to add group N"),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add group'),
-              onPressed: _addGroupToList,
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  Future<void> _addNewGroup() async {
-    String dropdownValue = 'One';
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add a new group'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: const <Widget>[
-                Text("Add amount of people for this group"),
-
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add group'),
-              onPressed: _addGroupToList,
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -116,7 +57,63 @@ class _GroupsPageState extends State<GroupsPage> {
             }),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewGroup,
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) {
+            return StatefulBuilder(
+                builder: (context, setStateForDialog) {
+                  return AlertDialog(
+                    title: const Text('Add a new group'),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: <Widget>[
+                          const Text("Add amount of people for this group"),
+                          DropdownButton<int>(
+                            value: _selectedNumber,
+                            hint: const Text("Choose a number"),
+                            icon: const Icon(Icons.arrow_downward),
+                            elevation: 16,
+                            style: const TextStyle(color: Colors.deepPurple),
+                            underline: Container(
+                              height: 2,
+                              color: Colors.deepPurpleAccent,
+                            ),
+                            onChanged: (int? newValue) {
+                              setStateForDialog(() {
+                                _selectedNumber = newValue!;
+                              });
+                            },
+                            items: _numbers.map((number) {
+                              return DropdownMenuItem(
+                                child: Text(number.toString()),
+                                value: number,
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _selectedNumber = null;
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Add group'),
+                        onPressed: () {
+                          _addGroupToList;
+                          _selectedNumber = null;
+                        },
+                      ),
+                    ],
+                  );
+                }
+            );
+          },
+        ),
         tooltip: 'Add group',
         child: const Icon(Icons.add),
       ),
