@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_app_flutter/factories/auth_service_factory.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,8 +21,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _submitForm() async {
-    if (await AuthService().verifyToken(bearerToken)) {
-      AuthService().saveBearerToken(bearerToken);
+    AuthService authService = await AuthServiceFactory.make(bearerToken: bearerToken);
+
+    if (await authService.verifyToken()) {
+      await authService.saveBearerToken(bearerToken);
 
       Navigator.of(context).pushReplacementNamed('/app');
     } else {

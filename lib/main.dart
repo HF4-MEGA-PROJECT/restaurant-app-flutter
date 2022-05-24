@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:restaurant_app_flutter/factories/auth_service_factory.dart';
 
 import 'package:restaurant_app_flutter/screens/app.dart';
 import 'package:restaurant_app_flutter/screens/login.dart';
 import 'package:restaurant_app_flutter/screens/qr.dart';
-import 'package:restaurant_app_flutter/services/auth.dart';
 
 bool _isAuthenticated = false;
 
 Future<void> main() async {
   await Hive.initFlutter();
 
-  _isAuthenticated = await AuthService().isAuthenticated();
+  _isAuthenticated = await (await AuthServiceFactory.make()).isAuthenticated();
 
   runApp(const MyApp());
 }

@@ -4,16 +4,17 @@ import 'package:dio/dio.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:restaurant_app_flutter/models/user.dart';
 
-import 'package:restaurant_app_flutter/services/dio_client.dart';
-
 class AuthService {
-  static String bearerTokenKey = 'bearer_token';
+  final String bearerTokenKey = 'bearer_token';
 
-  Future<bool> verifyToken(bearerToken) async {
+  final Box box;
+  final Dio dio;
+
+  AuthService(this.box, this.dio);
+
+  Future<bool> verifyToken() async {
     try {
-      await DioClient().dio.get('/user',
-          options:
-              Options(headers: {'Authorization': 'Bearer ' + bearerToken}));
+      await dio.get('/user');
     } catch (e) {
       return false;
     }
@@ -23,7 +24,7 @@ class AuthService {
 
   Future<User> getUser() async {
     try {
-      var response = await DioClient().dio.get<Map<String, dynamic>>('/user');
+      var response = await dio.get<Map<String, dynamic>>('/user');
 
       return User.fromJson(response.data!);
     } catch (e) {
@@ -33,24 +34,32 @@ class AuthService {
   }
 
   Future<bool> isAuthenticated() async {
-    var box = await Hive.openBox('myBox');
-
-    if (box.containsKey(AuthService.bearerTokenKey)) {
-      return await verifyToken(box.get(AuthService.bearerTokenKey));
+    if (box.containsKey(bearerTokenKey)) {
+      try {
+        await dio.get('/user', options: Options(
+            headers: {
+              'Authorization': 'Bearer ' + getBearerToken()
+            }
+          )
+        );
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
 
     return false;
   }
 
   String getBearerToken() {
-    return Hive.box('myBox').get(bearerTokenKey, defaultValue: '');
+    return box.get(bearerTokenKey, defaultValue: '');
   }
 
-  void saveBearerToken(String bearerToken) {
-    Hive.box('myBox').put(bearerTokenKey, bearerToken);
+  Future<void> saveBearerToken(String bearerToken) async {
+   await box.put(bearerTokenKey, bearerToken);
   }
 
-  void deleteBearerToken() {
-    Hive.box('myBox').delete(AuthService.bearerTokenKey);
+  Future<void> deleteBearerToken() async {
+    await box.delete(bearerTokenKey);
   }
 }
