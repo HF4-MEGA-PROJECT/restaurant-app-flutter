@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:restaurant_app_flutter/factories/auth_service_factory.dart';
+import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/models/user.dart';
 import 'package:restaurant_app_flutter/screens/login.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
@@ -14,10 +16,15 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   User? user;
 
+  Future<User> getUser() async {
+    AuthService authService = (await AuthServiceFactory.make());
+    return await authService.getUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<User>(
-      future: AuthService().getUser(),
+      future: getUser(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           user = snapshot.data;
@@ -69,9 +76,9 @@ class _AccountPageState extends State<AccountPage> {
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                         ),
-                        onPressed: () {
-                          AuthService().deleteBearerToken();
-                          pushNewScreen(context, screen: const LoginPage(), withNavBar: false);
+                        onPressed: () async {
+                          await (await BearerTokenFactory.make()).deleteBearerToken();
+                          await pushNewScreen(context, screen: const LoginPage(), withNavBar: false);
                         },
                         child: const Text('Log out'),
                       )

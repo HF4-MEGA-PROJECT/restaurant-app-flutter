@@ -1,19 +1,21 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:restaurant_app_flutter/models/user.dart';
 
-import 'package:restaurant_app_flutter/services/dio_client.dart';
-
 class AuthService {
-  static String bearerTokenKey = 'bearer_token';
+  final Dio dio;
 
-  Future<bool> verifyToken(bearerToken) async {
+  AuthService(this.dio);
+
+  Future<bool> verifyToken(String bearerToken) async {
     try {
-      await DioClient().dio.get('/user',
-          options:
-              Options(headers: {'Authorization': 'Bearer ' + bearerToken}));
+      await dio.get('/user', options: Options(
+          headers: {
+            'Authorization': 'Bearer ' + bearerToken
+          }
+        )
+      );
     } catch (e) {
       return false;
     }
@@ -23,7 +25,7 @@ class AuthService {
 
   Future<User> getUser() async {
     try {
-      var response = await DioClient().dio.get<Map<String, dynamic>>('/user');
+      var response = await dio.get<Map<String, dynamic>>('/user');
 
       return User.fromJson(response.data!);
     } catch (e) {
@@ -33,24 +35,11 @@ class AuthService {
   }
 
   Future<bool> isAuthenticated() async {
-    var box = await Hive.openBox('myBox');
-
-    if (box.containsKey(AuthService.bearerTokenKey)) {
-      return await verifyToken(box.get(AuthService.bearerTokenKey));
+    try {
+      await dio.get('/user');
+      return true;
+    } catch (e) {
+      return false;
     }
-
-    return false;
-  }
-
-  String getBearerToken() {
-    return Hive.box('myBox').get(bearerTokenKey, defaultValue: '');
-  }
-
-  void saveBearerToken(String bearerToken) {
-    Hive.box('myBox').put(bearerTokenKey, bearerToken);
-  }
-
-  void deleteBearerToken() {
-    Hive.box('myBox').delete(AuthService.bearerTokenKey);
   }
 }

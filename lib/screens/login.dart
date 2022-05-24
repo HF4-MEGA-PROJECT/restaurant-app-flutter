@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_app_flutter/factories/auth_service_factory.dart';
+import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
+import 'package:restaurant_app_flutter/services/bearer_token.dart';
 
 class LoginPage extends StatefulWidget {
   final String bearerToken;
@@ -15,15 +18,19 @@ class _LoginPageState extends State<LoginPage> {
 
   String bearerToken = '';
 
-  void _scanQRCode() {
-    Navigator.of(context).pushNamed('/qr');
+  Future<void> _scanQRCode() async {
+    await Navigator.of(context).pushNamed('/qr');
   }
 
   Future<void> _submitForm() async {
-    if (await AuthService().verifyToken(bearerToken)) {
-      AuthService().saveBearerToken(bearerToken);
+    AuthService authService = await AuthServiceFactory.make();
 
-      Navigator.of(context).pushReplacementNamed('/app');
+    if (await authService.verifyToken(bearerToken)) {
+      BearerTokenService bearerTokenService = await BearerTokenFactory.make();
+
+      await bearerTokenService.saveBearerToken(bearerToken);
+
+      await Navigator.of(context).pushReplacementNamed('/app');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -43,14 +50,10 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
   }
 
-  Future<bool> _onWillPop() async {
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop,
+      onWillPop: () async => false,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Login'),
