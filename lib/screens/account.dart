@@ -17,7 +17,7 @@ class _AccountPageState extends State<AccountPage> {
   User? user;
 
   Future<User> getUser() async {
-    AuthService authService = await AuthServiceFactory.make();
+    AuthService authService = (await AuthServiceFactory.make());
     return await authService.getUser();
   }
 
@@ -78,7 +78,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                         onPressed: () async {
                           await (await BearerTokenFactory.make()).deleteBearerToken();
-                          pushNewScreen(context, screen: const LoginPage(), withNavBar: false);
+                          await pushNewScreen(context, screen: const LoginPage(), withNavBar: false);
                         },
                         child: const Text('Log out'),
                       )
