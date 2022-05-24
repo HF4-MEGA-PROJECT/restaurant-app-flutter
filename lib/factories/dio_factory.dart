@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 class DioFactory {
   static Dio make(String bearerToken) {
-    return Dio(
+    Dio dio = Dio(
       BaseOptions(
         baseUrl: 'https://restaurant-backend.binau.dev/api',
         connectTimeout: 5000,
@@ -13,5 +13,9 @@ class DioFactory {
         },
       )
     );
+
+    dio.interceptors.add(LogInterceptor(responseBody: true, requestBody: true));
+
+    return dio;
   }
 }
