@@ -1,31 +1,45 @@
 import 'package:flutter/material.dart';
 
-class MyApp extends StatelessWidget {
+class OrdersPage extends StatefulWidget {
+  const OrdersPage({Key? key}) : super(key: key);
+  @override
+  State<OrdersPage> createState() => _OrdersPageState();
+}
 
+
+class _OrdersPageState extends State<OrdersPage> {
   @override
   Widget build(BuildContext context) {
-    const title = 'Grid List';
-
-    return MaterialApp(
-      title: title,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(title),
-        ),
-        body: GridView.count(
-          // Create a grid with 2 columns. If you change the scrollDirection to
-          // horizontal, this produces 2 rows.
-          crossAxisCount: 2,
-          // Generate 100 widgets that display their index in the List.
-          children: List.generate(100, (index) {
-            return Center(
-              child: Text(
-                'Item $index',
-                style: Theme.of(context).textTheme.headline5,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Category'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+         child: GridView.count(
+            primary: false,
+            padding: const EdgeInsets.all(20),
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            crossAxisCount: 2,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.red[700],
+                child: const Text("Forretter"),
               ),
-            );
-          }),
-        ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.red[700],
+                child: const Text('Hovedretter'),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.red[700],
+                child: const Text('Desserter'),
+              ),
+            ],
+          )
       ),
     );
   }

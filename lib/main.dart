@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import 'package:restaurant_app_flutter/screens/login.dart';
+import 'package:restaurant_app_flutter/screens/orders.dart';
 import 'package:restaurant_app_flutter/screens/qr.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
 import 'package:restaurant_app_flutter/screens/groups.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/groups': (context) => const GroupsPage(),
+        '/orders': (context) => const OrdersPage(),
         '/': (context) => _isAuthenticated
             ? const GroupsPage()
             : const LoginPage(bearerToken: ''),

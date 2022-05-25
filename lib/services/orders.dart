@@ -8,6 +8,7 @@ class OrderService{
   Future<bool> getOrderData() async{
     try{
       await DioClient().dio.get<Orders>('/category');
+      return true;
     } catch(e){
       log("Det virker ikke");
       rethrow;

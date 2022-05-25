@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_app_flutter/models/orders.dart';
 import 'package:restaurant_app_flutter/screens/Groups.dart';
+import 'package:restaurant_app_flutter/screens/orders.dart';
 
 class GroupsPage extends StatefulWidget {
   static const String route = '/groups';
@@ -32,7 +34,7 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<void> _goToGroup() async {
-
+    await Navigator.of(context).pushNamed('/orders');
   }
 
   Future<void> _addNewGroup() async {
@@ -89,7 +91,7 @@ class _GroupsPageState extends State<GroupsPage> {
             }),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewGroup,
+        onPressed: _goToGroup,
         tooltip: 'Add group',
         child: const Icon(Icons.add),
       ),
