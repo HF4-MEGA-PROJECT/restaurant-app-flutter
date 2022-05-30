@@ -90,17 +90,17 @@ class _GroupsPageState extends State<GroupsPage> {
                 child: _groupWidgets.isEmpty
                     ? const Text('No groups yet',
                         style: TextStyle(fontSize: 40))
-                    : GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 200,
-                                childAspectRatio: 3 / 2,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20),
-                        itemCount: _groupWidgets.length,
-                        itemBuilder: (BuildContext ctx, index) {
-                          return _groupWidgets[index];
-                        }),
+                    : RefreshIndicator(child: GridView.builder(
+                    gridDelegate:
+                    const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200,
+                        childAspectRatio: 3 / 2,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20),
+                    itemCount: _groupWidgets.length,
+                    itemBuilder: (BuildContext ctx, index) {
+                      return _groupWidgets[index];
+                    }), onRefresh: () async => setState(() {}))
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () => showDialog(
