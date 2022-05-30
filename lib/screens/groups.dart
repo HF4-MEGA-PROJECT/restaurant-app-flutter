@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
-import 'dart:math';
-import 'package:collection/collection.dart';
 
 import 'package:restaurant_app_flutter/screens/Groups.dart';
 import 'package:restaurant_app_flutter/services/groupsService.dart';
@@ -17,7 +15,6 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  var rng = Random();
 
   final List<int> _numbers = [
     1,
@@ -48,9 +45,9 @@ class _GroupsPageState extends State<GroupsPage> {
     );
   }
 
-  Future<void> _addNewGroup(int? amountOfPeople, int? number) async {
+  Future<void> _addNewGroup(int? amountOfPeople) async {
     try {
-      var group = Group(null, amountOfPeople, number, null, null, null);
+      var group = Group(null, amountOfPeople, null, null, null, null);
 
       await GroupsService().createGroup(group);
 
@@ -151,7 +148,7 @@ class _GroupsPageState extends State<GroupsPage> {
                           TextButton(
                             child: const Text('Add group'),
                             onPressed: () {
-                              _addNewGroup(_selectedNumber, rng.nextInt(100));
+                              _addNewGroup(_selectedNumber);
                               _selectedNumber = null;
                             },
                           ),
