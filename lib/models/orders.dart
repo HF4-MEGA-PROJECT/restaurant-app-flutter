@@ -1,19 +1,18 @@
 class Orders {
-  int? id;
-  String? name;
-  Null? categoryId;
-  String? createdAt;
-  String? updatedAt;
+  int id;
+  String name;
+  int? categoryId;
+  String createdAt;
+  String updatedAt;
 
-  Orders({this.id, this.name, this.categoryId, this.createdAt, this.updatedAt});
+  Orders({required this.id, required this.name, this.categoryId, required this.createdAt, required this.updatedAt});
 
-  Orders.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    categoryId = json['category_id'];
-    createdAt = json['created_at'];
+  Orders.fromJson(Map<String, dynamic> json) :
+    id = json['id'],
+    name = json['name'],
+    categoryId = json['category_id'],
+    createdAt = json['created_at'],
     updatedAt = json['updated_at'];
-  }
 
   /*Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -25,3 +24,5 @@ class Orders {
     return data;
   }*/
 }
+
+
