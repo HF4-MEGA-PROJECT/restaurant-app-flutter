@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import 'dart:math';
+import 'package:collection/collection.dart';
 
 import 'package:restaurant_app_flutter/screens/Groups.dart';
 import 'package:restaurant_app_flutter/services/groupsService.dart';
@@ -18,21 +19,28 @@ class GroupsPage extends StatefulWidget {
 class _GroupsPageState extends State<GroupsPage> {
   var rng = Random();
 
-  final List<Widget> _groupWidgets = [];
-  List<Group>? _groupList = [];
-
-  final List<int> _numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  final List<int> _numbers = [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ];
   int? _selectedNumber;
-
-  late final Future<List<Group>> allGroups;
-  @override
-  void initState() {
-    allGroups = getGroups();
-  }
-
 
   Widget _group(int? amountOfPeople, int? number) {
     return ElevatedButton.icon(
+      key: Key(number.toString()),
       onPressed: _goToGroup,
       label: Text('Group $number' '\n\n $amountOfPeople people',
           style: const TextStyle(fontSize: 15.0)),
@@ -40,18 +48,18 @@ class _GroupsPageState extends State<GroupsPage> {
     );
   }
 
-  void _addNewGroup(int? amountOfPeople, int? number){
+  Future<void> _addNewGroup(int? amountOfPeople, int? number) async {
     try {
-      setState(() {
-        _groupWidgets.add(_group(amountOfPeople, number));
-      });
+      var group = Group(null, amountOfPeople, number, null, null, null);
+
+      await GroupsService().createGroup(group);
+
+      setState(() {});
     } catch (e) {
       developer.log('Failed adding new group!', error: e);
       rethrow;
     }
-
   }
-
 
   Future<void> _goToGroup() async {}
 
@@ -63,13 +71,16 @@ class _GroupsPageState extends State<GroupsPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Group>>(
-        future: allGroups,
+        future: getGroups(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            _groupList = snapshot.data;
+            List<Group>? _groupList = snapshot.data;
+            List<Widget> _groupWidgets = [];
+
             for (var group in _groupList!) {
               _groupWidgets.add(_group(group.amountOfPeople, group.number));
             }
+
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Groups'),
@@ -140,8 +151,7 @@ class _GroupsPageState extends State<GroupsPage> {
                           TextButton(
                             child: const Text('Add group'),
                             onPressed: () {
-                              _addNewGroup(
-                                  _selectedNumber, rng.nextInt(100));
+                              _addNewGroup(_selectedNumber, rng.nextInt(100));
                               _selectedNumber = null;
                             },
                           ),
