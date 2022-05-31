@@ -2,18 +2,18 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:restaurant_app_flutter/services/dioclient.dart';
 import 'package:restaurant_app_flutter/models/group.dart';
 
-class GroupsService{
+class GroupService {
+  final Dio dio;
 
-  GroupsService();
+  GroupService(this.dio);
 
   Future<void> createGroup(Group group) async {
     try {
       String json = jsonEncode(group);
 
-      await DioClient().dio.post('/group', data: json);
+      await dio.post('/group', data: json);
 
     } catch (e) {
       log('Failed creating group!', error: e);
@@ -24,7 +24,7 @@ class GroupsService{
   Future<void> deleteGroup(Group group) async {
     try {
 
-      await DioClient().dio.delete('/group/${group.id}');
+      await dio.delete('/group/${group.id}');
 
     } catch (e) {
       log('Failed deleting group!', error: e);
@@ -32,23 +32,21 @@ class GroupsService{
     }
   }
 
-  Future<void> editGroupAmountOfPeople(Group group) async {
+  Future<void> updateGroup(Group group) async {
     try {
       String json = jsonEncode(group);
 
-      await DioClient().dio.put('/group/${group.id}', data: json);
+      await dio.put('/group/${group.id}', data: json);
 
     } catch (e) {
-      log('Failed deleting group!', error: e);
+      log('Failed editing group!', error: e);
       rethrow;
     }
   }
 
-
-
   Future<List<Group>> getAllGroups() async {
     try {
-      var response = await DioClient().dio.get('/group');
+      var response = await dio.get('/group');
 
       return (response.data as List).map((group)=> Group.fromJson(group)).toList();
 

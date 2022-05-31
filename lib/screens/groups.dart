@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
 import 'dart:developer' as developer;
 
-import 'package:restaurant_app_flutter/screens/Groups.dart';
-import 'package:restaurant_app_flutter/services/groupsService.dart';
 import 'package:restaurant_app_flutter/models/group.dart';
 
 class GroupsPage extends StatefulWidget {
-  static const String route = '/groups';
-
   const GroupsPage({Key? key}) : super(key: key);
 
   @override
@@ -64,7 +61,8 @@ class _GroupsPageState extends State<GroupsPage> {
                       padding: EdgeInsets.only(right: 5),
                       child: Icon(Icons.people, size: 40),
                     ),
-                    Text('${group.amountOfPeople}', style: const TextStyle(fontSize: 25))
+                    Text('${group.amountOfPeople}',
+                        style: const TextStyle(fontSize: 25))
                   ],
                 ),
               ),
@@ -139,7 +137,7 @@ class _GroupsPageState extends State<GroupsPage> {
     try {
       var group = Group(null, amountOfPeople, null, null, null, null);
 
-      await GroupsService().createGroup(group);
+      await (await GroupServiceFactory.make()).createGroup(group);
 
       setState(() {});
     } catch (e) {
@@ -151,17 +149,18 @@ class _GroupsPageState extends State<GroupsPage> {
   void goToOrdersForGroup() {}
 
   Future<void> deleteGroup(Group group) async {
-    await GroupsService().deleteGroup(group);
+    await (await GroupServiceFactory.make()).deleteGroup(group);
     setState(() {});
   }
 
   Future<void> editGroupAmountOfPeople(Group group) async {
-    await GroupsService().editGroupAmountOfPeople(group);
+    await (await GroupServiceFactory.make()).updateGroup(group);
     setState(() {});
   }
 
   Future<List<Group>> getGroups() async {
-    List<Group> groups = await GroupsService().getAllGroups();
+    List<Group> groups =
+        await (await GroupServiceFactory.make()).getAllGroups();
     return groups;
   }
 
