@@ -31,6 +31,9 @@ class _AccountPageState extends State<AccountPage> {
 
           return SafeArea(
             child: Scaffold(
+              appBar: AppBar(
+                title: const Text('Account'),
+              ),
               body: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0), 
