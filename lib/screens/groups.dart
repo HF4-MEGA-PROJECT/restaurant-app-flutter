@@ -15,7 +15,6 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-
   final List<int> _numbers = [
     1,
     2,
@@ -35,17 +34,108 @@ class _GroupsPageState extends State<GroupsPage> {
   ];
   int? _selectedNumber;
 
-  Widget _group(int? amountOfPeople, int? number) {
-    return ElevatedButton.icon(
-      key: Key(number.toString()),
-      onPressed: _goToGroup,
-      label: Text('Group $number' '\n\n $amountOfPeople people',
-          style: const TextStyle(fontSize: 15.0)),
-      icon: const Icon(Icons.edit),
-    );
+  Widget _group(BuildContext context, Group group) {
+    return ElevatedButton(
+        style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(10)),
+        key: Key(group.number.toString()),
+        onPressed: () => _showOptionsForGroup(context, group),
+        child: Row(
+          children: [
+            Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                      color: Colors.white, shape: BoxShape.circle),
+                  child: Center(
+                    child: Text('${group.number}',
+                        style: const TextStyle(
+                            fontSize: 30.0, color: Colors.black)),
+                  ),
+                )),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Align(
+                alignment: Alignment.center,
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(right: 5),
+                      child: Icon(Icons.people, size: 40),
+                    ),
+                    Text('${group.amountOfPeople}', style: const TextStyle(fontSize: 25))
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ));
   }
 
-  Future<void> _addNewGroup(int? amountOfPeople) async {
+  Widget _showOptionsForGroup(BuildContext context, Group group) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setStateForDialog) {
+            return AlertDialog(
+              title: Text("Options for group ${group.number}"),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: [
+                    Row(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: Text("Edit amount of people"),
+                        ),
+                        DropdownButton<int>(
+                          value: group.amountOfPeople,
+                          hint: const Text(""),
+                          icon: const Icon(Icons.arrow_downward),
+                          elevation: 16,
+                          style: const TextStyle(color: Colors.deepPurple),
+                          underline: Container(
+                            height: 2,
+                            color: Colors.deepPurpleAccent,
+                          ),
+                          onChanged: (int? newValue) {
+                            setStateForDialog(() {
+                              group.amountOfPeople = newValue!;
+                            });
+                            editGroupAmountOfPeople(group);
+                          },
+                          items: _numbers.map((number) {
+                            return DropdownMenuItem(
+                              child: Text(number.toString()),
+                              value: number,
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 50),
+                      child: ElevatedButton(
+                          onPressed: () => goToOrdersForGroup(),
+                          child: Text("Go to orders for ${group.number}"),
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.deepPurpleAccent)),
+                    ),
+                    ElevatedButton(
+                        onPressed: () =>
+                            {deleteGroup(group), Navigator.of(context).pop()},
+                        child: Text("Delete group ${group.number}")),
+                  ],
+                ),
+              ),
+            );
+          });
+        });
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  Future<void> addNewGroup(int? amountOfPeople) async {
     try {
       var group = Group(null, amountOfPeople, null, null, null, null);
 
@@ -58,7 +148,17 @@ class _GroupsPageState extends State<GroupsPage> {
     }
   }
 
-  Future<void> _goToGroup() async {}
+  void goToOrdersForGroup() {}
+
+  Future<void> deleteGroup(Group group) async {
+    await GroupsService().deleteGroup(group);
+    setState(() {});
+  }
+
+  Future<void> editGroupAmountOfPeople(Group group) async {
+    await GroupsService().editGroupAmountOfPeople(group);
+    setState(() {});
+  }
 
   Future<List<Group>> getGroups() async {
     List<Group> groups = await GroupsService().getAllGroups();
@@ -75,7 +175,7 @@ class _GroupsPageState extends State<GroupsPage> {
             List<Widget> _groupWidgets = [];
 
             for (var group in _groupList!) {
-              _groupWidgets.add(_group(group.amountOfPeople, group.number));
+              _groupWidgets.add(_group(context, group));
             }
 
             return Scaffold(
@@ -83,22 +183,23 @@ class _GroupsPageState extends State<GroupsPage> {
                 title: const Text('Groups'),
               ),
               body: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: _groupWidgets.isEmpty
-                    ? const Text('No groups yet',
-                        style: TextStyle(fontSize: 40))
-                    : RefreshIndicator(child: GridView.builder(
-                    gridDelegate:
-                    const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 200,
-                        childAspectRatio: 3 / 2,
-                        crossAxisSpacing: 20,
-                        mainAxisSpacing: 20),
-                    itemCount: _groupWidgets.length,
-                    itemBuilder: (BuildContext ctx, index) {
-                      return _groupWidgets[index];
-                    }), onRefresh: () async => setState(() {}))
-              ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: _groupWidgets.isEmpty
+                      ? const Text('No groups yet',
+                          style: TextStyle(fontSize: 40))
+                      : RefreshIndicator(
+                          child: GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                      maxCrossAxisExtent: 200,
+                                      childAspectRatio: 3 / 2,
+                                      crossAxisSpacing: 20,
+                                      mainAxisSpacing: 20),
+                              itemCount: _groupWidgets.length,
+                              itemBuilder: (BuildContext ctx, index) {
+                                return _groupWidgets[index];
+                              }),
+                          onRefresh: () async => setState(() {}))),
               floatingActionButton: FloatingActionButton(
                 onPressed: () => showDialog(
                   context: context,
@@ -148,8 +249,9 @@ class _GroupsPageState extends State<GroupsPage> {
                           TextButton(
                             child: const Text('Add group'),
                             onPressed: () {
-                              _addNewGroup(_selectedNumber);
+                              addNewGroup(_selectedNumber);
                               _selectedNumber = null;
+                              Navigator.of(context).pop();
                             },
                           ),
                         ],

@@ -9,7 +9,7 @@ class GroupsService{
 
   GroupsService();
 
-  Future<void> createGroup(group) async {
+  Future<void> createGroup(Group group) async {
     try {
       String json = jsonEncode(group);
 
@@ -20,6 +20,31 @@ class GroupsService{
       rethrow;
     }
   }
+
+  Future<void> deleteGroup(Group group) async {
+    try {
+
+      await DioClient().dio.delete('/group/${group.id}');
+
+    } catch (e) {
+      log('Failed deleting group!', error: e);
+      rethrow;
+    }
+  }
+
+  Future<void> editGroupAmountOfPeople(Group group) async {
+    try {
+      String json = jsonEncode(group);
+
+      await DioClient().dio.put('/group/${group.id}', data: json);
+
+    } catch (e) {
+      log('Failed deleting group!', error: e);
+      rethrow;
+    }
+  }
+
+
 
   Future<List<Group>> getAllGroups() async {
     try {
