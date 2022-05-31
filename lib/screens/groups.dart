@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app_flutter/models/orders.dart';
+import 'package:restaurant_app_flutter/models/category.dart';
 import 'package:restaurant_app_flutter/screens/Groups.dart';
-import 'package:restaurant_app_flutter/screens/orders.dart';
+import 'package:restaurant_app_flutter/screens/category.dart';
 
 class GroupsPage extends StatefulWidget {
   static const String route = '/groups';

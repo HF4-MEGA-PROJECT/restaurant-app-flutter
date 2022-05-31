@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import 'package:restaurant_app_flutter/screens/login.dart';
-import 'package:restaurant_app_flutter/screens/orders.dart';
+import 'package:restaurant_app_flutter/screens/category.dart';
 import 'package:restaurant_app_flutter/screens/qr.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
 import 'package:restaurant_app_flutter/screens/groups.dart';

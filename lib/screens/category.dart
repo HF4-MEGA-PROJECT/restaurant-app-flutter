@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app_flutter/models/orders.dart';
+import 'package:restaurant_app_flutter/models/category.dart';
 
-import '../services/orders.dart';
+import '../services/category.dart';
+
 
 class OrdersPage extends StatefulWidget {
   final int? categoryId;
@@ -13,13 +14,17 @@ class OrdersPage extends StatefulWidget {
 
 class _OrdersPageState extends State<OrdersPage> {
 
-  Future<List<Orders>> getCategories() async{
-    return await OrderService().getAllCategoriesById(widget.categoryId);
+  Future<List<Category>> getCategories() async{
+    if(widget.categoryId == null){
+      List<Category> d = await CategoryService().getAllCategories();
+      return d.where((element) => element.categoryId == null).toList();
+    }
+    return await CategoryService().getAllCategoriesById(widget.categoryId!);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Orders>>(future: getCategories(), builder: (context,snapshot){
+    return FutureBuilder<List<Category>>(future: getCategories(), builder: (context,snapshot){
       if(snapshot.hasData){
         List<Widget> categoryWidgets = <Widget>[];
         snapshot.data?.forEach((element) {
@@ -34,12 +39,17 @@ class _OrdersPageState extends State<OrdersPage> {
         });
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Category'),
+            title: const Text('Kategori'),
           ),
           body: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 3/2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
                 itemBuilder: (BuildContext context, int index) {
                   return categoryWidgets[index];
               },itemCount: categoryWidgets.length,
