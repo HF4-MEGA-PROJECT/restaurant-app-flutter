@@ -43,14 +43,17 @@ class _AccountPageState extends State<AccountPage> {
                         children: [
                           Expanded(
                             child: FittedBox(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  user!.profilePhoto,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(Icons.account_box_rounded);
-                                  }
-                                )
+                              child: Container(
+                                constraints: const BoxConstraints(minWidth: 1.0, minHeight: 1.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    user!.profilePhoto,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(Icons.account_box_rounded);
+                                    }
+                                  )
+                                ),
                               )
                             )
                           ),
