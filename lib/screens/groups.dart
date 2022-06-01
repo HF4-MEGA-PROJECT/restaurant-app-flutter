@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_app_flutter/screens/category.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({Key? key}) : super(key: key);
@@ -29,34 +30,9 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<void> _goToGroup() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add a new group'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: const <Widget>[
-                Text("You are about to add group N"),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add group'),
-              onPressed: _addGroupToList,
-            ),
-          ],
-        );
-      },
-    );
+    await Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => const CategoryPage(),
+        settings: const RouteSettings(name: '/category')));
   }
 
   Future<void> _addNewGroup() async {
@@ -110,7 +86,7 @@ class _GroupsPageState extends State<GroupsPage> {
               }),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _addNewGroup,
+          onPressed: _goToGroup,
           tooltip: 'Add group',
           child: const Icon(Icons.add),
         ));
