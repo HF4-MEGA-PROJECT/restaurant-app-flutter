@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/screens/account.dart';
 import 'package:restaurant_app_flutter/screens/groups.dart';
+import 'package:restaurant_app_flutter/screens/orders.dart';
 
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class App extends StatelessWidget {
   }
 
   List<Widget> _buildScreens() {
-    return [const GroupsPage(), const AccountPage()];
+    return [const GroupsPage(), const OrdersPage(), const AccountPage()];
   }
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
@@ -41,6 +42,12 @@ class App extends StatelessWidget {
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.people),
         title: ("Groups"),
+        activeColorPrimary: Colors.red,
+        inactiveColorPrimary: Colors.white,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.list),
+        title: ("Orders"),
         activeColorPrimary: Colors.red,
         inactiveColorPrimary: Colors.white,
       ),
