@@ -3,7 +3,7 @@ import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
 import 'dart:developer' as developer;
 
 import 'package:restaurant_app_flutter/models/group.dart';
-import 'package:restaurant_app_flutter/screens/category.dart';
+import 'package:restaurant_app_flutter/screens/group.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({Key? key}) : super(key: key);
@@ -74,10 +74,10 @@ class _GroupsPageState extends State<GroupsPage> {
                           hint: const Text(""),
                           icon: const Icon(Icons.arrow_downward),
                           elevation: 16,
-                          style: const TextStyle(color: Colors.deepPurple),
+                          style: const TextStyle(color: Colors.lightBlue),
                           underline: Container(
                             height: 2,
-                            color: Colors.deepPurpleAccent,
+                            color: Colors.lightBlue,
                           ),
                           onChanged: (int? newValue) {
                             setStateForDialog(() {
@@ -97,10 +97,13 @@ class _GroupsPageState extends State<GroupsPage> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 50),
                       child: ElevatedButton(
-                          onPressed: () => goToOrdersForGroup(),
-                          child: Text("Go to orders for ${group.number}"),
+                          onPressed: () async {
+                            Navigator.of(context).pop();
+                            await goToOrdersForGroup();
+                          },
+                          child: Text("Go to orders for group ${group.number}"),
                           style: ElevatedButton.styleFrom(
-                              primary: Colors.deepPurpleAccent)),
+                              primary: Colors.lightBlue)),
                     ),
                     ElevatedButton(
                         onPressed: () =>
@@ -128,9 +131,9 @@ class _GroupsPageState extends State<GroupsPage> {
     }
   }
 
-  void goToOrdersForGroup() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const CategoryPage()));
+  Future<void> goToOrdersForGroup() async {
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const GroupPage()));
   }
 
   Future<void> deleteGroup(Group group) async {
@@ -210,11 +213,10 @@ class _GroupsPageState extends State<GroupsPage> {
                                 hint: const Text("Choose a number"),
                                 icon: const Icon(Icons.arrow_downward),
                                 elevation: 16,
-                                style:
-                                    const TextStyle(color: Colors.deepPurple),
+                                style: const TextStyle(color: Colors.lightBlue),
                                 underline: Container(
                                   height: 2,
-                                  color: Colors.deepPurpleAccent,
+                                  color: Colors.lightBlue,
                                 ),
                                 onChanged: (int? newValue) {
                                   setStateForDialog(() {
