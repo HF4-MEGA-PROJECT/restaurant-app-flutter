@@ -12,7 +12,7 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  final List<int> _numbers = [for (var i = 1; i <= 999; i += 1) i];
+  final List<int> _numbers = [for (var i = 1; i <= 3; i += 1) i];
   int? _selectedNumber;
 
   Widget _group(BuildContext context, Group group) {
@@ -169,8 +169,14 @@ class _GroupsPageState extends State<GroupsPage> {
                 child: RefreshIndicator(
                     onRefresh: () async => setState(() {}),
                     child: _groupWidgets.isEmpty
-                        ? Stack(children: <Widget>[ListView(children: const [Text('No groups yet \n Pull down to refresh',
-                        style: TextStyle(fontSize: 40))],), ])
+                        ? Stack(children: <Widget>[
+                            ListView(
+                              children: const [
+                                Text('No groups yet \n Pull down to refresh',
+                                    style: TextStyle(fontSize: 40))
+                              ],
+                            ),
+                          ])
                         : GridView.builder(
                             gridDelegate:
                                 const SliverGridDelegateWithMaxCrossAxisExtent(
