@@ -30,70 +30,57 @@ class _AccountPageState extends State<AccountPage> {
           user = snapshot.data;
 
           return SafeArea(
-            child: Scaffold(
-              appBar: AppBar(
-                title: const Text('Account'),
-              ),
-              body: SingleChildScrollView(
+              child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Account'),
+            ),
+            body: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0), 
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(children: [
+                      Row(children: [
+                        Expanded(
                             child: FittedBox(
-                              child: Container(
-                                constraints: const BoxConstraints(minWidth: 1.0, minHeight: 1.0),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    user!.profilePhoto,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.account_box_rounded);
-                                    }
-                                  )
-                                ),
-                              )
-                            )
-                          ),
-                          Expanded(
-                            child: Padding(
+                                child: Container(
+                          constraints: const BoxConstraints(
+                              minWidth: 1.0, minHeight: 1.0),
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(user!.profilePhoto,
+                                  errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.account_box_rounded);
+                              })),
+                        ))),
+                        Expanded(
+                          child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  FittedBox(
-                                    fit: BoxFit.fitWidth, 
-                                    child: Text(user!.name, maxLines: 1)
-                                  ),
-                                  FittedBox(
-                                    fit: BoxFit.fitWidth,
-                                    child: Text(user!.email, maxLines: 1)
-                                  )
-                                ]
-                              )
-                            ),
-                          ),
-                        ]
-                      ),
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    FittedBox(
+                                        fit: BoxFit.fitWidth,
+                                        child: Text(user!.name, maxLines: 1)),
+                                    FittedBox(
+                                        fit: BoxFit.fitWidth,
+                                        child: Text(user!.email, maxLines: 1))
+                                  ])),
+                        ),
+                      ]),
                       SizedBox.fromSize(size: const Size.fromHeight(8)),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                         ),
                         onPressed: () async {
-                          await (await BearerTokenFactory.make()).deleteBearerToken();
-                          await pushNewScreen(context, screen: const LoginPage(), withNavBar: false);
+                          await (await BearerTokenFactory.make())
+                              .deleteBearerToken();
+                          await pushNewScreen(context,
+                              screen: const LoginPage(), withNavBar: false);
                         },
                         child: const Text('Log out'),
                       )
-                    ]
-                  )
-                )
-              ),
-            )
-          );
+                    ]))),
+          ));
         }
 
         return const Center(child: CircularProgressIndicator());

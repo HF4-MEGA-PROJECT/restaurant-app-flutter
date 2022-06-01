@@ -10,12 +10,9 @@ class AuthService {
 
   Future<bool> verifyToken(String bearerToken) async {
     try {
-      await dio.get('/user', options: Options(
-          headers: {
-            'Authorization': 'Bearer ' + bearerToken
-          }
-        )
-      );
+      await dio.get('/user',
+          options:
+              Options(headers: {'Authorization': 'Bearer ' + bearerToken}));
     } catch (e) {
       return false;
     }

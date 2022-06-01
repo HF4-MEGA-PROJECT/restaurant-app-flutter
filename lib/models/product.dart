@@ -9,7 +9,8 @@ class Product {
   String updatedAt;
   String? deletedAt;
 
-  Product(this.id, this.name, this.description, this.price, this.categoryId, this.photoPath, this.createdAt, this.updatedAt, this.deletedAt);
+  Product(this.id, this.name, this.description, this.price, this.categoryId,
+      this.photoPath, this.createdAt, this.updatedAt, this.deletedAt);
 
   Product.fromJson(Map<String, dynamic> json)
       : id = json['id'],
