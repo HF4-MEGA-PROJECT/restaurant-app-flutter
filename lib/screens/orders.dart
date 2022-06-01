@@ -1,7 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/factories/order_service_factory.dart';
 import 'package:restaurant_app_flutter/models/order.dart';
 import 'package:restaurant_app_flutter/models/product.dart';
+import 'package:restaurant_app_flutter/screens/login.dart';
 import 'package:restaurant_app_flutter/services/order.dart';
 
 class OrdersPage extends StatefulWidget {
@@ -32,13 +36,16 @@ class _OrdersPageState extends State<OrdersPage> {
               children: [
                 Text(
                   'Order ' + order.id.toString(),
-                  style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                  style: const TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 ...getProductTexts(order)
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -48,7 +55,7 @@ class _OrdersPageState extends State<OrdersPage> {
   List<Text> getProductTexts(Order order) {
     Map<int, int> productIdToCountMap = {};
 
-    for(Product product in order.products) {
+    for (Product product in order.products) {
       productIdToCountMap.update(product.id, (value) => value + 1, ifAbsent: () => 1);
     }
 
@@ -75,7 +82,7 @@ class _OrdersPageState extends State<OrdersPage> {
                 title: const Text('Orders'),
               ),
               body: Padding(
-                padding: const EdgeInsets.all(8.0), 
+                padding: const EdgeInsets.all(8.0),
                 child: RefreshIndicator(
                   onRefresh: () async => setState(() {}),
                   child: GridView.builder(
@@ -83,17 +90,36 @@ class _OrdersPageState extends State<OrdersPage> {
                       childAspectRatio: 6 / 2,
                       crossAxisSpacing: 20,
                       mainAxisSpacing: 20,
-                      crossAxisCount: 1
+                      crossAxisCount: 1,
                     ),
                     itemCount: orderWidgets.length,
                     itemBuilder: (BuildContext ctx, index) {
                       return orderWidgets[index];
-                    }
-                  )
-                )
-              )
-            )
+                    },
+                  ),
+                ),
+              ),
+            ),
           );
+        }
+
+        if (snapshot.hasError) {
+          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
+            BearerTokenFactory.make().then(
+              (bearerTokenService) {
+                bearerTokenService.deleteBearerToken();
+                pushNewScreen(
+                  context,
+                  screen: const LoginPage(),
+                  withNavBar: false,
+                  customPageRoute: PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
+              },
+            );
+          }
         }
 
         return const Center(child: CircularProgressIndicator());

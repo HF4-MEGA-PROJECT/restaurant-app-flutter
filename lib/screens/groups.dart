@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
 import 'dart:developer' as developer;
 
 import 'package:restaurant_app_flutter/models/group.dart';
 import 'package:restaurant_app_flutter/screens/group.dart';
+import 'package:restaurant_app_flutter/screens/login.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({Key? key}) : super(key: key);
@@ -18,46 +22,51 @@ class _GroupsPageState extends State<GroupsPage> {
 
   Widget _group(BuildContext context, Group group) {
     return ElevatedButton(
-        style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(10)),
-        key: Key(group.number.toString()),
-        onPressed: () => _showOptionsForGroup(context, group),
-        child: Row(
-          children: [
-            Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                      color: Colors.white, shape: BoxShape.circle),
-                  child: Center(
-                    child: Text('${group.number}',
-                        style: const TextStyle(
-                            fontSize: 30.0, color: Colors.black)),
-                  ),
-                )),
-            Align(
-              alignment: Alignment.center,
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(right: 5),
-                    child: Icon(Icons.people, size: 40),
-                  ),
-                  Text('${group.amountOfPeople}',
-                      style: const TextStyle(fontSize: 25))
-                ],
+      style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(10)),
+      key: Key(group.number.toString()),
+      onPressed: () => _showOptionsForGroup(context, group),
+      child: Row(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              child: Center(
+                child: Text(
+                  '${group.number}',
+                  style: const TextStyle(fontSize: 30.0, color: Colors.black),
+                ),
               ),
             ),
-          ],
-        ));
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(right: 5),
+                  child: Icon(Icons.people, size: 40),
+                ),
+                Text(
+                  '${group.amountOfPeople}',
+                  style: const TextStyle(fontSize: 25),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _showOptionsForGroup(BuildContext context, Group group) {
     showDialog(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setStateForDialog) {
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateForDialog) {
             return AlertDialog(
               title: Text("Options for group ${group.number}"),
               content: SingleChildScrollView(
@@ -97,24 +106,26 @@ class _GroupsPageState extends State<GroupsPage> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 50),
                       child: ElevatedButton(
-                          onPressed: () async {
-                            Navigator.of(context).pop();
-                            await goToOrdersForGroup();
-                          },
-                          child: Text("Go to orders for group ${group.number}"),
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.lightBlue)),
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          await goToOrdersForGroup();
+                        },
+                        child: Text("Go to orders for group ${group.number}"),
+                        style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
+                      ),
                     ),
                     ElevatedButton(
-                        onPressed: () =>
-                            {deleteGroup(group), Navigator.of(context).pop()},
+                        onPressed: () => {deleteGroup(group), Navigator.of(context).pop()},
                         child: Text("Delete group ${group.number}")),
                   ],
                 ),
               ),
             );
-          });
-        });
+          },
+        );
+      },
+    );
+
     return const Center(child: CircularProgressIndicator());
   }
 
@@ -132,8 +143,7 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<void> goToOrdersForGroup() async {
-    await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const GroupPage()));
+    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const GroupPage()));
   }
 
   Future<void> deleteGroup(Group group) async {
@@ -147,61 +157,66 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<List<Group>> getGroups() async {
-    List<Group> groups =
-        await (await GroupServiceFactory.make()).getAllGroups();
+    List<Group> groups = await (await GroupServiceFactory.make()).getAllGroups();
     return groups;
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Group>>(
-        future: getGroups(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List<Group>? _groupList = snapshot.data;
-            List<Widget> _groupWidgets = [];
+      future: getGroups(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Group>? _groupList = snapshot.data;
+          List<Widget> _groupWidgets = [];
 
-            _groupList?.sort((a, b) => a.number!.compareTo(b.number!));
+          _groupList?.sort((a, b) => a.number!.compareTo(b.number!));
 
-            for (var group in _groupList!) {
-              _groupWidgets.add(_group(context, group));
-            }
+          for (var group in _groupList!) {
+            _groupWidgets.add(_group(context, group));
+          }
 
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Groups'),
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Groups'),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RefreshIndicator(
+                onRefresh: () async => setState(() {}),
+                child: _groupWidgets.isEmpty
+                    ? Stack(
+                        children: <Widget>[
+                          ListView(
+                            children: const [
+                              Text(
+                                'No groups yet \n Pull down to refresh',
+                                style: TextStyle(fontSize: 40),
+                              )
+                            ],
+                          ),
+                        ],
+                      )
+                    : GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 200,
+                          childAspectRatio: 3 / 2,
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                        ),
+                        itemCount: _groupWidgets.length,
+                        itemBuilder: (BuildContext ctx, index) {
+                          return _groupWidgets[index];
+                        },
+                      ),
               ),
-              body: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: RefreshIndicator(
-                    onRefresh: () async => setState(() {}),
-                    child: _groupWidgets.isEmpty
-                        ? Stack(children: <Widget>[
-                            ListView(
-                              children: const [
-                                Text('No groups yet \n Pull down to refresh',
-                                    style: TextStyle(fontSize: 40))
-                              ],
-                            ),
-                          ])
-                        : GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: 200,
-                                    childAspectRatio: 3 / 2,
-                                    crossAxisSpacing: 20,
-                                    mainAxisSpacing: 20),
-                            itemCount: _groupWidgets.length,
-                            itemBuilder: (BuildContext ctx, index) {
-                              return _groupWidgets[index];
-                            })),
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (context) {
-                    return StatefulBuilder(
-                        builder: (context, setStateForDialog) {
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) {
+                  return StatefulBuilder(
+                    builder: (context, setStateForDialog) {
                       return AlertDialog(
                         title: const Text('Add a new group'),
                         content: SingleChildScrollView(
@@ -251,15 +266,37 @@ class _GroupsPageState extends State<GroupsPage> {
                           ),
                         ],
                       );
-                    });
-                  },
-                ),
-                tooltip: 'Add group',
-                child: const Icon(Icons.add),
+                    },
+                  );
+                },
               ),
+              tooltip: 'Add group',
+              child: const Icon(Icons.add),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
+            BearerTokenFactory.make().then(
+              (bearerTokenService) {
+                bearerTokenService.deleteBearerToken();
+                pushNewScreen(
+                  context,
+                  screen: const LoginPage(),
+                  withNavBar: false,
+                  customPageRoute: PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
+              },
             );
           }
-          return const Center(child: CircularProgressIndicator());
-        });
+        }
+
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
   }
 }

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
-import 'dart:developer' as developer;
 
-import 'package:restaurant_app_flutter/models/group.dart';
 import 'package:restaurant_app_flutter/screens/category.dart';
 
 class GroupPage extends StatefulWidget {
@@ -24,7 +21,9 @@ class _GroupPageState extends State<GroupPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const CategoryPage()),
+          MaterialPageRoute(
+            builder: (context) => const CategoryPage(),
+          ),
         ),
         tooltip: 'Add order',
         child: const Icon(Icons.add),
