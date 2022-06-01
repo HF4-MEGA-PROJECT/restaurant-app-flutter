@@ -12,23 +12,7 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  final List<int> _numbers = [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15
-  ];
+  final List<int> _numbers = [for(var i=1; i<=99; i+=1) i];
   int? _selectedNumber;
 
   Widget _group(BuildContext context, Group group) {
@@ -173,9 +157,13 @@ class _GroupsPageState extends State<GroupsPage> {
             List<Group>? _groupList = snapshot.data;
             List<Widget> _groupWidgets = [];
 
+            _groupList?.sort((a, b) => a.number!.compareTo(b.number!));
+
             for (var group in _groupList!) {
               _groupWidgets.add(_group(context, group));
             }
+
+
 
             return Scaffold(
               appBar: AppBar(
