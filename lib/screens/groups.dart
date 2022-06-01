@@ -12,7 +12,7 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  final List<int> _numbers = [for(var i=1; i<=99; i+=1) i];
+  final List<int> _numbers = [for (var i = 1; i <= 99; i += 1) i];
   int? _selectedNumber;
 
   Widget _group(BuildContext context, Group group) {
@@ -35,20 +35,17 @@ class _GroupsPageState extends State<GroupsPage> {
                             fontSize: 30.0, color: Colors.black)),
                   ),
                 )),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Align(
-                alignment: Alignment.center,
-                child: Row(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 5),
-                      child: Icon(Icons.people, size: 40),
-                    ),
-                    Text('${group.amountOfPeople}',
-                        style: const TextStyle(fontSize: 25))
-                  ],
-                ),
+            Align(
+              alignment: Alignment.center,
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 5),
+                    child: Icon(Icons.people, size: 40),
+                  ),
+                  Text('${group.amountOfPeople}',
+                      style: const TextStyle(fontSize: 25))
+                ],
               ),
             ),
           ],
@@ -163,30 +160,29 @@ class _GroupsPageState extends State<GroupsPage> {
               _groupWidgets.add(_group(context, group));
             }
 
-
-
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Groups'),
               ),
               body: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _groupWidgets.isEmpty
-                      ? const Text('No groups yet',
-                          style: TextStyle(fontSize: 40))
-                      : RefreshIndicator(
-                          child: GridView.builder(
-                              gridDelegate:
-                                  const SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: 200,
-                                      childAspectRatio: 3 / 2,
-                                      crossAxisSpacing: 20,
-                                      mainAxisSpacing: 20),
-                              itemCount: _groupWidgets.length,
-                              itemBuilder: (BuildContext ctx, index) {
-                                return _groupWidgets[index];
-                              }),
-                          onRefresh: () async => setState(() {}))),
+                padding: const EdgeInsets.all(8.0),
+                child: RefreshIndicator(
+                    onRefresh: () async => setState(() {}),
+                    child: _groupWidgets.isEmpty
+                        ? Stack(children: <Widget>[ListView(children: const [Text('No groups yet \n Pull down to refresh',
+                        style: TextStyle(fontSize: 40))],), ])
+                        : GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 200,
+                                    childAspectRatio: 3 / 2,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20),
+                            itemCount: _groupWidgets.length,
+                            itemBuilder: (BuildContext ctx, index) {
+                              return _groupWidgets[index];
+                            })),
+              ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () => showDialog(
                   context: context,
