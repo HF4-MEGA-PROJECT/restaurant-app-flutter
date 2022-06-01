@@ -12,7 +12,7 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  final List<int> _numbers = [for (var i = 1; i <= 9999; i += 1) i];
+  final List<int> _numbers = [for (var i = 1; i <= 999; i += 1) i];
   int? _selectedNumber;
 
   Widget _group(BuildContext context, Group group) {
