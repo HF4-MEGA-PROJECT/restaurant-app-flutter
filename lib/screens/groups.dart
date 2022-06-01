@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
 import 'dart:developer' as developer;
 
@@ -12,9 +14,13 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
+  int? selectedNumber;
 
   Future<void> addNewGroup(int? amountOfPeople) async {
     try {
+      if (amountOfPeople! > 99) {
+        amountOfPeople = 99;
+      }
       var group = Group(null, amountOfPeople, null, null, null, null);
 
       await (await GroupServiceFactory.make()).createGroup(group);
@@ -69,37 +75,42 @@ class _GroupsPageState extends State<GroupsPage> {
                           onRefresh: () async => setState(() {}))),
               floatingActionButton: FloatingActionButton(
                 onPressed: () => showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('Add a new group'),
-                      content: SingleChildScrollView(
-                        child: ListBody(
-                          children: <Widget>[
-                            const Text("Add amount of people for this group"),
-                            DropDownWidget()
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            DropDownWidget().selectedNumber = null;
-                          },
-                        ),
-                        TextButton(
-                          child: const Text('Add group'),
-                          onPressed: () {
-                            addNewGroup(DropDownWidget().selectedNumber);
-                            DropDownWidget().selectedNumber = null;
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  }),
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Add a new group'),
+                        content: SingleChildScrollView(
+                            child: Form(
+                          child: ListBody(
+                            children: <Widget>[
+                              const Text("Add amount of people for this group"),
+                              TextFormFieldWidget(
+                                onChanged: (int? newValue) {
+                                  setState(() {
+                                    selectedNumber = newValue;
+                                  });
+                                },
+                              )
+                            ],
+                          ),
+                        )),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('Cancel'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: const Text('Add group'),
+                            onPressed: () {
+                              addNewGroup(selectedNumber);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    }),
                 tooltip: 'Add group',
                 child: const Icon(Icons.add),
               ),
@@ -112,9 +123,11 @@ class _GroupsPageState extends State<GroupsPage> {
 
 class ShowOptionsWidget extends StatefulWidget {
   final Group group;
+  final Function onChanged;
 
   const ShowOptionsWidget({
     required this.group,
+    required this.onChanged,
     Key? key,
   }) : super(key: key);
 
@@ -123,9 +136,19 @@ class ShowOptionsWidget extends StatefulWidget {
 }
 
 class _ShowOptionsWidgetState extends State<ShowOptionsWidget> {
-  final List<int> _numbers = [for(var i=1; i<=15; i+=1) i];
+  Group? group;
+  int? selectedNumber;
+
+  @override
+  void initState() {
+    group = widget.group;
+    super.initState();
+  }
 
   Future<void> editGroupAmountOfPeople(Group group) async {
+    if (group.amountOfPeople! > 99) {
+      group.amountOfPeople = 99;
+    }
     await (await GroupServiceFactory.make()).updateGroup(group);
     setState(() {});
   }
@@ -134,73 +157,53 @@ class _ShowOptionsWidgetState extends State<ShowOptionsWidget> {
 
   Future<void> deleteGroup(Group group) async {
     await (await GroupServiceFactory.make()).deleteGroup(group);
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setStateForDialog) {
-            return AlertDialog(
-              title: Text("Options for group ${widget.group.number}"),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: [
-                    Row(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: Text("Edit amount of people"),
-                        ),
-                        DropdownButton<int>(
-                          value: widget.group.amountOfPeople,
-                          hint: const Text(""),
-                          icon: const Icon(Icons.arrow_downward),
-                          elevation: 16,
-                          style: const TextStyle(color: Colors.deepPurple),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.deepPurpleAccent,
-                          ),
-                          onChanged: (int? newValue) {
-                            setStateForDialog(() {
-                              widget.group.amountOfPeople = newValue!;
-                            });
-                            editGroupAmountOfPeople(widget.group);
-                          },
-                          items: _numbers.map((number) {
-                            return DropdownMenuItem(
-                              child: Text(number.toString()),
-                              value: number,
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 50),
-                      child: ElevatedButton(
-                          onPressed: () => goToOrdersForGroup(),
-                          child:
-                              Text("Go to orders for ${widget.group.number}"),
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.deepPurpleAccent)),
-                    ),
-                    ElevatedButton(
-                        onPressed: () => {
-                              deleteGroup(widget.group),
-                              Navigator.of(context).pop()
-                            },
-                        child: Text("Delete group ${widget.group.number}")),
-                  ],
-                ),
+    return StatefulBuilder(builder: (context, setStateForDialog) {
+      return AlertDialog(
+        title: Text("Options for group ${group!.number}"),
+        content: SingleChildScrollView(
+            child: Form(
+          child: ListBody(
+            children: [
+              Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 10),
+                    child: Text("Edit amount of people"),
+                  ),
+                  Expanded(
+                      child: TextFormFieldWidget(
+                    selectedNumber: group!.amountOfPeople,
+                    onChanged: (int? newValue) {
+                      setState(() {
+                        group!.amountOfPeople = newValue;
+                        widget.onChanged(newValue);
+                        editGroupAmountOfPeople(group!);
+                      });
+                    },
+                  ))
+                ],
               ),
-            );
-          });
-        });
-    return const Center(child: CircularProgressIndicator());
+              Padding(
+                padding: const EdgeInsets.only(bottom: 50),
+                child: ElevatedButton(
+                    onPressed: () => goToOrdersForGroup(),
+                    child: Text("Go to orders for group ${group!.number}"),
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.deepPurpleAccent)),
+              ),
+              ElevatedButton(
+                  onPressed: () =>
+                      {deleteGroup(group!), Navigator.of(context).pop()},
+                  child: Text("Delete group ${group!.number}")),
+            ],
+          ),
+        )),
+      );
+    });
   }
 }
 
@@ -217,11 +220,28 @@ class GroupWidget extends StatefulWidget {
 }
 
 class _GroupWidgetState extends State<GroupWidget> {
+  Group? group;
+
+  @override
+  void initState() {
+    group = widget.group;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(10)),
-        onPressed: () => ShowOptionsWidget(group: widget.group),
+        onPressed: () => showDialog(
+            context: context,
+            builder: (context) {
+              return ShowOptionsWidget(
+                group: group!,
+                onChanged: (int? value) => setState(() {
+                  group!.amountOfPeople = value;
+                }),
+              );
+            }),
         child: Row(
           children: [
             Align(
@@ -232,7 +252,7 @@ class _GroupWidgetState extends State<GroupWidget> {
                   decoration: const BoxDecoration(
                       color: Colors.white, shape: BoxShape.circle),
                   child: Center(
-                    child: Text('${widget.group.number}',
+                    child: Text('${group!.number}',
                         style: const TextStyle(
                             fontSize: 30.0, color: Colors.black)),
                   ),
@@ -247,7 +267,7 @@ class _GroupWidgetState extends State<GroupWidget> {
                       padding: EdgeInsets.only(right: 5),
                       child: Icon(Icons.people, size: 40),
                     ),
-                    Text('${widget.group.amountOfPeople}',
+                    Text('${group!.amountOfPeople}',
                         style: const TextStyle(fontSize: 25))
                   ],
                 ),
@@ -258,45 +278,57 @@ class _GroupWidgetState extends State<GroupWidget> {
   }
 }
 
-class DropDownWidget extends StatefulWidget {
-  final List<int> _numbers = [for(var i=1; i<=15; i+=1) i];
-  int? selectedNumber;
+class TextFormFieldWidget extends StatefulWidget {
+  final int? selectedNumber;
+  final Function onChanged;
 
-  DropDownWidget({
+  const TextFormFieldWidget({
     this.selectedNumber,
+    required this.onChanged,
     Key? key,
   }) : super(key: key);
 
   @override
-  _DropDownWidgetState createState() => _DropDownWidgetState();
+  _TextFormFieldWidgetState createState() => _TextFormFieldWidgetState();
 }
 
-class _DropDownWidgetState extends State<DropDownWidget> {
+class _TextFormFieldWidgetState extends State<TextFormFieldWidget> {
+  int? selectedNumber;
+  Function? onChanged;
+
+  @override
+  void initState() {
+    selectedNumber = widget.selectedNumber;
+    onChanged = widget.onChanged;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return StatefulBuilder(builder: (context, setStateForDialog) {
-      return DropdownButton<int>(
-        value: widget.selectedNumber,
-        hint: const Text("Choose a number"),
-        icon: const Icon(Icons.arrow_downward),
-        elevation: 16,
-        style:
-        const TextStyle(color: Colors.deepPurple),
-        underline: Container(
-          height: 2,
-          color: Colors.deepPurpleAccent,
+      return TextFormField(
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        initialValue: selectedNumber?.toString(),
+        decoration: const InputDecoration(
+          hintText: "Choose a number",
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.deepPurpleAccent),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.deepPurpleAccent),
+          ),
         ),
-        onChanged: (int? newValue) {
-          setStateForDialog(() {
-            widget.selectedNumber = newValue!;
+        onChanged: (value) {
+          setState(() {
+            int integer = 0;
+            if (int.tryParse(value) != null) {
+              integer = int.tryParse(value)!;
+            }
+            selectedNumber = integer;
+            onChanged!(integer);
           });
         },
-        items: widget._numbers.map((number) {
-          return DropdownMenuItem(
-            child: Text(number.toString()),
-            value: number,
-          );
-        }).toList(),
       );
     });
   }
