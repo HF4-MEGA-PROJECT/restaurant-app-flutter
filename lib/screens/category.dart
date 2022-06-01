@@ -14,10 +14,14 @@ class OrdersPage extends StatefulWidget {
 
 class _OrdersPageState extends State<OrdersPage> {
 
+  Future<void> goBackToCategoryRoot() async {
+    await Navigator.of(context).pushNamed('/category');
+  }
+
   Future<List<Category>> getCategories() async{
     if(widget.categoryId == null){
-      List<Category> d = await CategoryService().getAllCategories();
-      return d.where((element) => element.categoryId == null).toList();
+      List<Category> categoryList = await CategoryService().getAllCategories();
+      return categoryList.where((element) => element.categoryId == null).toList();
     }
     return await CategoryService().getAllCategoriesById(widget.categoryId!);
   }
@@ -29,17 +33,22 @@ class _OrdersPageState extends State<OrdersPage> {
         List<Widget> categoryWidgets = <Widget>[];
         snapshot.data?.forEach((element) {
           categoryWidgets.add(
-              ElevatedButton.icon(
+              ElevatedButton(
                   onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => OrdersPage(categoryId: element.id,))),
-                  icon: Icon(Icons.ac_unit_outlined),
-                  label: Text(element.name)
+                  child: Text(
+                      element.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25
+                      ),
+                  )
               )
           );
         });
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Kategori'),
+            title: const Text('category'),
           ),
           body: Padding(
               padding: const EdgeInsets.all(8),
@@ -55,6 +64,11 @@ class _OrdersPageState extends State<OrdersPage> {
               },itemCount: categoryWidgets.length,
               )
           ),
+          floatingActionButton: FloatingActionButton(
+          onPressed: goBackToCategoryRoot,
+          tooltip: 'Go back to categories root',
+          child: const Icon(Icons.keyboard_return_rounded),
+        ),
         );
       }
       return const Center(child: CircularProgressIndicator());

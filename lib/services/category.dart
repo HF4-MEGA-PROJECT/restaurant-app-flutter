@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:developer';
 
-import 'package:dio/dio.dart';
 import 'package:restaurant_app_flutter/models/category.dart';
 import 'package:restaurant_app_flutter/services/dioclient.dart';
 
