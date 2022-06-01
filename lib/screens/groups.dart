@@ -1,5 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_app_flutter/screens/category.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
+import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
+import 'dart:developer' as developer;
+
+import 'package:restaurant_app_flutter/models/group.dart';
+import 'package:restaurant_app_flutter/screens/group.dart';
+import 'package:restaurant_app_flutter/screens/login.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({Key? key}) : super(key: key);
@@ -9,86 +17,286 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  String bearerToken = '';
-  String defaultText = 'No groups yet';
-  int groupsAmount = 0;
-  final List<Widget> _groupList = [];
+  final List<int> _numbers = [for (var i = 1; i <= 3; i += 1) i];
+  int? _selectedNumber;
 
-  Widget _group() {
-    return ElevatedButton.icon(
-      onPressed: _goToGroup,
-      label: const Text('Group' 'N', style: TextStyle(fontSize: 15.0)),
-      icon: const Icon(Icons.edit),
-    );
-  }
-
-  void _addGroupToList() {
-    setState(() {
-      groupsAmount += 1;
-      _groupList.add(_group());
-    });
-  }
-
-  Future<void> _goToGroup() async {
-    await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => const CategoryPage(),
-        settings: const RouteSettings(name: '/category')));
-  }
-
-  Future<void> _addNewGroup() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add a new group'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: const <Widget>[
-                Text("Add amount of people for this group"),
+  Widget _group(BuildContext context, Group group) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(10)),
+      key: Key(group.number.toString()),
+      onPressed: () => _showOptionsForGroup(context, group),
+      child: Row(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              child: Center(
+                child: Text(
+                  '${group.number}',
+                  style: const TextStyle(fontSize: 30.0, color: Colors.black),
+                ),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(right: 5),
+                  child: Icon(Icons.people, size: 40),
+                ),
+                Text(
+                  '${group.amountOfPeople}',
+                  style: const TextStyle(fontSize: 25),
+                )
               ],
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add group'),
-              onPressed: _addGroupToList,
-            ),
-          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _showOptionsForGroup(BuildContext context, Group group) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateForDialog) {
+            return AlertDialog(
+              title: Text("Options for group ${group.number}"),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: [
+                    Row(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: Text("Edit amount of people"),
+                        ),
+                        DropdownButton<int>(
+                          value: group.amountOfPeople,
+                          hint: const Text(""),
+                          icon: const Icon(Icons.arrow_downward),
+                          elevation: 16,
+                          style: const TextStyle(color: Colors.lightBlue),
+                          underline: Container(
+                            height: 2,
+                            color: Colors.lightBlue,
+                          ),
+                          onChanged: (int? newValue) {
+                            setStateForDialog(() {
+                              group.amountOfPeople = newValue!;
+                            });
+                            editGroupAmountOfPeople(group);
+                          },
+                          items: _numbers.map((number) {
+                            return DropdownMenuItem(
+                              child: Text(number.toString()),
+                              value: number,
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 50),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          await goToOrdersForGroup();
+                        },
+                        child: Text("Go to orders for group ${group.number}"),
+                        style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
+                      ),
+                    ),
+                    ElevatedButton(
+                        onPressed: () => {deleteGroup(group), Navigator.of(context).pop()},
+                        child: Text("Delete group ${group.number}")),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
+
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  Future<void> addNewGroup(int? amountOfPeople) async {
+    try {
+      var group = Group(null, amountOfPeople, null, null, null, null);
+
+      await (await GroupServiceFactory.make()).createGroup(group);
+
+      setState(() {});
+    } catch (e) {
+      developer.log('Failed adding new group!', error: e);
+      rethrow;
+    }
+  }
+
+  Future<void> goToOrdersForGroup() async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const GroupPage()));
+  }
+
+  Future<void> deleteGroup(Group group) async {
+    await (await GroupServiceFactory.make()).deleteGroup(group);
+    setState(() {});
+  }
+
+  Future<void> editGroupAmountOfPeople(Group group) async {
+    await (await GroupServiceFactory.make()).updateGroup(group);
+    setState(() {});
+  }
+
+  Future<List<Group>> getGroups() async {
+    List<Group> groups = await (await GroupServiceFactory.make()).getAllGroups();
+    return groups;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Groups'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 200,
-                  childAspectRatio: 3 / 2,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20),
-              itemCount: _groupList.length,
-              itemBuilder: (BuildContext ctx, index) {
-                return _groupList[index];
-              }),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _goToGroup,
-          tooltip: 'Add group',
-          child: const Icon(Icons.add),
-        ));
+    return FutureBuilder<List<Group>>(
+      future: getGroups(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Group>? _groupList = snapshot.data;
+          List<Widget> _groupWidgets = [];
+
+          _groupList?.sort((a, b) => a.number!.compareTo(b.number!));
+
+          for (var group in _groupList!) {
+            _groupWidgets.add(_group(context, group));
+          }
+
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Groups'),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RefreshIndicator(
+                onRefresh: () async => setState(() {}),
+                child: _groupWidgets.isEmpty
+                    ? Stack(
+                        children: <Widget>[
+                          ListView(
+                            children: const [
+                              Text(
+                                'No groups yet \n Pull down to refresh',
+                                style: TextStyle(fontSize: 40),
+                              )
+                            ],
+                          ),
+                        ],
+                      )
+                    : GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 200,
+                          childAspectRatio: 3 / 2,
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                        ),
+                        itemCount: _groupWidgets.length,
+                        itemBuilder: (BuildContext ctx, index) {
+                          return _groupWidgets[index];
+                        },
+                      ),
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) {
+                  return StatefulBuilder(
+                    builder: (context, setStateForDialog) {
+                      return AlertDialog(
+                        title: const Text('Add a new group'),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: <Widget>[
+                              const Text("Add amount of people for this group"),
+                              DropdownButton<int>(
+                                value: _selectedNumber,
+                                hint: const Text("Choose a number"),
+                                icon: const Icon(Icons.arrow_downward),
+                                elevation: 16,
+                                style: const TextStyle(color: Colors.lightBlue),
+                                underline: Container(
+                                  height: 2,
+                                  color: Colors.lightBlue,
+                                ),
+                                onChanged: (int? newValue) {
+                                  setStateForDialog(() {
+                                    _selectedNumber = newValue!;
+                                  });
+                                },
+                                items: _numbers.map((number) {
+                                  return DropdownMenuItem(
+                                    child: Text(number.toString()),
+                                    value: number,
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('Cancel'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _selectedNumber = null;
+                            },
+                          ),
+                          TextButton(
+                            child: const Text('Add group'),
+                            onPressed: () {
+                              addNewGroup(_selectedNumber);
+                              _selectedNumber = null;
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+              tooltip: 'Add group',
+              child: const Icon(Icons.add),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
+            BearerTokenFactory.make().then(
+              (bearerTokenService) {
+                bearerTokenService.deleteBearerToken();
+                pushNewScreen(
+                  context,
+                  screen: const LoginPage(),
+                  withNavBar: false,
+                  customPageRoute: PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
+              },
+            );
+          }
+        }
+
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
   }
 }

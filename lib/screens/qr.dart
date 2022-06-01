@@ -29,12 +29,11 @@ class _QRPageState extends State<QRPage> {
 
             await Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) =>
-                    LoginPage(bearerToken: barcode.rawValue!),
+                builder: (context) => LoginPage(bearerToken: barcode.rawValue!),
               ),
             );
           }
-        }
+        },
       ),
     );
   }

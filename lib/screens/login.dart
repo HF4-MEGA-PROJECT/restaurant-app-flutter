@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: <Widget>[
                   TextFormField(
                     decoration: const InputDecoration(
-                      hintText: 'Enter the bearer token or scan the qr code'
+                      hintText: 'Enter the bearer token or scan the qr code',
                     ),
                     initialValue: bearerToken,
                     onChanged: (value) {
@@ -84,20 +84,20 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _submitForm,
                     child: const Text('Log in'),
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50)
+                      minimumSize: const Size.fromHeight(50),
                     ),
-                  )
+                  ),
                 ],
-              )
-            )
+              ),
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: _scanQRCode,
           tooltip: 'Scan QR code',
           child: const Icon(Icons.camera_alt),
-        )
-      )
+        ),
+      ),
     );
   }
 }

@@ -7,8 +7,7 @@ import 'package:restaurant_app_flutter/screens/orders.dart';
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
 
-  final PersistentTabController _controller =
-      PersistentTabController(initialIndex: 0);
+  final PersistentTabController _controller = PersistentTabController(initialIndex: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +27,8 @@ class App extends StatelessWidget {
           popAllScreensOnTapOfSelectedTab: true,
           popActionScreens: PopActionScreensType.all,
           navBarStyle: NavBarStyle.style6,
-        )
-      )
+        ),
+      ),
     );
   }
 
