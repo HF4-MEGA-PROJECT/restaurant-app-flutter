@@ -3,6 +3,7 @@ import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
 import 'dart:developer' as developer;
 
 import 'package:restaurant_app_flutter/models/group.dart';
+import 'package:restaurant_app_flutter/screens/category.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({Key? key}) : super(key: key);
@@ -127,7 +128,10 @@ class _GroupsPageState extends State<GroupsPage> {
     }
   }
 
-  void goToOrdersForGroup() {}
+  void goToOrdersForGroup() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const CategoryPage()));
+  }
 
   Future<void> deleteGroup(Group group) async {
     await (await GroupServiceFactory.make()).deleteGroup(group);
