@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
@@ -17,7 +20,6 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  final List<int> _numbers = [for (var i = 1; i <= 3; i += 1) i];
   int? _selectedNumber;
 
   Widget _group(BuildContext context, Group group) {
@@ -62,49 +64,76 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Widget _showOptionsForGroup(BuildContext context, Group group) {
+    final _formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateForDialog) {
             return AlertDialog(
-              title: Text("Options for group ${group.number}"),
+              title: Text(
+                "Options for group ${group.number}",
+                textAlign: TextAlign.center,
+              ),
               content: SingleChildScrollView(
                 child: ListBody(
                   children: [
-                    Row(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: Text("Edit amount of people"),
-                        ),
-                        DropdownButton<int>(
-                          value: group.amountOfPeople,
-                          hint: const Text(""),
-                          icon: const Icon(Icons.arrow_downward),
-                          elevation: 16,
-                          style: const TextStyle(color: Colors.lightBlue),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.lightBlue,
-                          ),
-                          onChanged: (int? newValue) {
-                            setStateForDialog(() {
-                              group.amountOfPeople = newValue!;
-                            });
-                            editGroupAmountOfPeople(group);
-                          },
-                          items: _numbers.map((number) {
-                            return DropdownMenuItem(
-                              child: Text(number.toString()),
-                              value: number,
-                            );
-                          }).toList(),
-                        ),
-                      ],
+                    const Text("Edit amount of people", textAlign: TextAlign.center),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 25),
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: Padding(
+                            padding: const EdgeInsets.only(right: 5),
+                            child: Form(
+                              key: _formKey,
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                initialValue: group.amountOfPeople.toString(),
+                                decoration: const InputDecoration(
+                                  hintText: "Choose a number",
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                  ),
+                                ),
+                                onSaved: (newValue) {
+                                  setStateForDialog(() {
+                                    int? integer = 1;
+                                    if (int.tryParse(newValue!) != null) {
+                                      integer = int.tryParse(newValue)!;
+                                    }
+                                    group.amountOfPeople = integer;
+                                    if (group.amountOfPeople! > 99) {
+                                      group.amountOfPeople = 99;
+                                    }
+
+                                    editGroupAmountOfPeople(group);
+                                    Navigator.of(context).pop();
+                                  });
+                                },
+                              ),
+                            ),
+                          )),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                _formKey.currentState?.save();
+                              },
+                              child: const Text("Confirm"),
+                              style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 50),
+                      padding: const EdgeInsets.only(bottom: 25),
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.of(context).pop();
@@ -131,6 +160,7 @@ class _GroupsPageState extends State<GroupsPage> {
 
   Future<void> addNewGroup(int? amountOfPeople) async {
     try {
+      amountOfPeople ??= 1;
       var group = Group(null, amountOfPeople, null, null, null, null);
 
       await (await GroupServiceFactory.make()).createGroup(group);
@@ -223,28 +253,32 @@ class _GroupsPageState extends State<GroupsPage> {
                           child: ListBody(
                             children: <Widget>[
                               const Text("Add amount of people for this group"),
-                              DropdownButton<int>(
-                                value: _selectedNumber,
-                                hint: const Text("Choose a number"),
-                                icon: const Icon(Icons.arrow_downward),
-                                elevation: 16,
-                                style: const TextStyle(color: Colors.lightBlue),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.lightBlue,
+                              TextFormField(
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                initialValue: null,
+                                decoration: const InputDecoration(
+                                  hintText: "Choose a number",
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                  ),
                                 ),
-                                onChanged: (int? newValue) {
+                                onChanged: (newValue) {
                                   setStateForDialog(() {
-                                    _selectedNumber = newValue!;
+                                    int? integer = 0;
+                                    if (int.tryParse(newValue) != null) {
+                                      integer = int.tryParse(newValue)!;
+                                    }
+                                    _selectedNumber = integer;
+                                    if (_selectedNumber! > 99) {
+                                      _selectedNumber = 99;
+                                    }
                                   });
                                 },
-                                items: _numbers.map((number) {
-                                  return DropdownMenuItem(
-                                    child: Text(number.toString()),
-                                    value: number,
-                                  );
-                                }).toList(),
-                              ),
+                              )
                             ],
                           ),
                         ),
@@ -262,6 +296,9 @@ class _GroupsPageState extends State<GroupsPage> {
                               addNewGroup(_selectedNumber);
                               _selectedNumber = null;
                               Navigator.of(context).pop();
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const GroupPage(),
+                              ));
                             },
                           ),
                         ],
