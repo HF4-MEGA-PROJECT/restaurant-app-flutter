@@ -64,8 +64,7 @@ class _GroupsPageState extends State<GroupsPage> {
             child: Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(
-                  color: Colors.white, shape: BoxShape.circle),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
               child: Center(
                 child: Text(
                   '${group.number}',
@@ -95,6 +94,8 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Widget _showOptionsForGroup(BuildContext context, Group group) {
+    final _formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       builder: (context) {
@@ -108,8 +109,7 @@ class _GroupsPageState extends State<GroupsPage> {
               content: SingleChildScrollView(
                 child: ListBody(
                   children: [
-                    const Text("Edit amount of people",
-                        textAlign: TextAlign.center),
+                    const Text("Edit amount of people", textAlign: TextAlign.center),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 25),
                       child: Row(
@@ -117,46 +117,46 @@ class _GroupsPageState extends State<GroupsPage> {
                           Expanded(
                               child: Padding(
                             padding: const EdgeInsets.only(right: 5),
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              initialValue: group.amountOfPeople.toString(),
-                              decoration: const InputDecoration(
-                                hintText: "Choose a number",
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.deepPurpleAccent),
+                            child: Form(
+                              key: _formKey,
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                initialValue: group.amountOfPeople.toString(),
+                                decoration: const InputDecoration(
+                                  hintText: "Choose a number",
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                  ),
                                 ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.deepPurpleAccent),
-                                ),
+                                onSaved: (newValue) {
+                                  setStateForDialog(() {
+                                    int? integer = 1;
+                                    if (int.tryParse(newValue!) != null) {
+                                      integer = int.tryParse(newValue)!;
+                                    }
+                                    group.amountOfPeople = integer;
+                                    if (group.amountOfPeople! > 99) {
+                                      group.amountOfPeople = 99;
+                                    }
+
+                                    editGroupAmountOfPeople(group);
+                                    Navigator.of(context).pop();
+                                  });
+                                },
                               ),
-                              onChanged: (newValue) {
-                                setStateForDialog(() {
-                                  int? integer = 1;
-                                  if (int.tryParse(newValue) != null) {
-                                    integer = int.tryParse(newValue)!;
-                                  }
-                                  group.amountOfPeople = integer;
-                                  if (group.amountOfPeople! > 99) {
-                                    group.amountOfPeople = 99;
-                                  }
-                                });
-                              },
                             ),
                           )),
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () async {
-                                editGroupAmountOfPeople(group);
-                                Navigator.of(context).pop();
+                                _formKey.currentState?.save();
                               },
                               child: const Text("Confirm"),
-                              style: ElevatedButton.styleFrom(
-                                  primary: Colors.lightBlue),
+                              style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
                             ),
                           )
                         ],
@@ -170,8 +170,7 @@ class _GroupsPageState extends State<GroupsPage> {
                           await goToOrdersForGroup();
                         },
                         child: Text("Go to orders for group ${group.number}"),
-                        style:
-                            ElevatedButton.styleFrom(primary: Colors.lightBlue),
+                        style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
                       ),
                     ),
                     ElevatedButton(
@@ -204,8 +203,7 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<void> goToOrdersForGroup() async {
-    await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const GroupPage()));
+    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const GroupPage()));
   }
 
   Future<void> deleteGroup(Group group) async {
@@ -219,8 +217,7 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<List<Group>> getGroups() async {
-    List<Group> groups =
-        await (await GroupServiceFactory.make()).getAllGroups();
+    List<Group> groups = await (await GroupServiceFactory.make()).getAllGroups();
     return groups;
   }
 
@@ -261,8 +258,7 @@ class _GroupsPageState extends State<GroupsPage> {
                         ],
                       )
                     : GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 200,
                           childAspectRatio: 3 / 2,
                           crossAxisSpacing: 20,
@@ -289,19 +285,15 @@ class _GroupsPageState extends State<GroupsPage> {
                               const Text("Add amount of people for this group"),
                               TextFormField(
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                 initialValue: null,
                                 decoration: const InputDecoration(
                                   hintText: "Choose a number",
                                   enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.deepPurpleAccent),
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
                                   ),
                                   focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.deepPurpleAccent),
+                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
                                   ),
                                 ),
                                 onChanged: (newValue) {
@@ -352,8 +344,7 @@ class _GroupsPageState extends State<GroupsPage> {
         }
 
         if (snapshot.hasError) {
-          if (snapshot.error is DioError &&
-              (snapshot.error as DioError).response?.statusCode == 401) {
+          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
             BearerTokenFactory.make().then(
               (bearerTokenService) {
                 bearerTokenService.deleteBearerToken();
@@ -362,8 +353,7 @@ class _GroupsPageState extends State<GroupsPage> {
                   screen: const LoginPage(),
                   withNavBar: false,
                   customPageRoute: PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        const LoginPage(),
+                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
                     transitionDuration: Duration.zero,
                   ),
                 );

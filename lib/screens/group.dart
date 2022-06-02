@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:restaurant_app_flutter/screens/category.dart';
 
 class GroupPage extends StatefulWidget {
