@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/factories/group_service_factory.dart';
@@ -17,7 +20,6 @@ class GroupsPage extends StatefulWidget {
 }
 
 class _GroupsPageState extends State<GroupsPage> {
-  final List<int> _numbers = [for (var i = 1; i <= 3; i += 1) i];
   int? _selectedNumber;
 
   Widget _group(BuildContext context, Group group) {
@@ -32,7 +34,8 @@ class _GroupsPageState extends State<GroupsPage> {
             child: Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                  color: Colors.white, shape: BoxShape.circle),
               child: Center(
                 child: Text(
                   '${group.number}',
@@ -68,54 +71,82 @@ class _GroupsPageState extends State<GroupsPage> {
         return StatefulBuilder(
           builder: (context, setStateForDialog) {
             return AlertDialog(
-              title: Text("Options for group ${group.number}"),
+              title: Text(
+                "Options for group ${group.number}",
+                textAlign: TextAlign.center,
+              ),
               content: SingleChildScrollView(
                 child: ListBody(
                   children: [
-                    Row(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: Text("Edit amount of people"),
-                        ),
-                        DropdownButton<int>(
-                          value: group.amountOfPeople,
-                          hint: const Text(""),
-                          icon: const Icon(Icons.arrow_downward),
-                          elevation: 16,
-                          style: const TextStyle(color: Colors.lightBlue),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.lightBlue,
-                          ),
-                          onChanged: (int? newValue) {
-                            setStateForDialog(() {
-                              group.amountOfPeople = newValue!;
-                            });
-                            editGroupAmountOfPeople(group);
-                          },
-                          items: _numbers.map((number) {
-                            return DropdownMenuItem(
-                              child: Text(number.toString()),
-                              value: number,
-                            );
-                          }).toList(),
-                        ),
-                      ],
+                    const Text("Edit amount of people",
+                        textAlign: TextAlign.center),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 25),
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: Padding(
+                            padding: const EdgeInsets.only(right: 5),
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              initialValue: group.amountOfPeople.toString(),
+                              decoration: const InputDecoration(
+                                hintText: "Choose a number",
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.deepPurpleAccent),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.deepPurpleAccent),
+                                ),
+                              ),
+                              onChanged: (newValue) {
+                                setStateForDialog(() {
+                                  int? integer = 1;
+                                  if (int.tryParse(newValue) != null) {
+                                    integer = int.tryParse(newValue)!;
+                                  }
+                                  group.amountOfPeople = integer;
+                                  if (group.amountOfPeople! > 99) {
+                                    group.amountOfPeople = 99;
+                                  }
+                                });
+                              },
+                            ),
+                          )),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                editGroupAmountOfPeople(group);
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text("Confirm"),
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.lightBlue),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 50),
+                      padding: const EdgeInsets.only(bottom: 25),
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.of(context).pop();
                           await goToOrdersForGroup();
                         },
                         child: Text("Go to orders for group ${group.number}"),
-                        style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
+                        style:
+                            ElevatedButton.styleFrom(primary: Colors.lightBlue),
                       ),
                     ),
                     ElevatedButton(
-                        onPressed: () => {deleteGroup(group), Navigator.of(context).pop()},
+                        onPressed: () =>
+                            {deleteGroup(group), Navigator.of(context).pop()},
                         child: Text("Delete group ${group.number}")),
                   ],
                 ),
@@ -131,6 +162,7 @@ class _GroupsPageState extends State<GroupsPage> {
 
   Future<void> addNewGroup(int? amountOfPeople) async {
     try {
+      amountOfPeople ??= 1;
       var group = Group(null, amountOfPeople, null, null, null, null);
 
       await (await GroupServiceFactory.make()).createGroup(group);
@@ -143,7 +175,8 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<void> goToOrdersForGroup() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const GroupPage()));
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const GroupPage()));
   }
 
   Future<void> deleteGroup(Group group) async {
@@ -157,7 +190,8 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<List<Group>> getGroups() async {
-    List<Group> groups = await (await GroupServiceFactory.make()).getAllGroups();
+    List<Group> groups =
+        await (await GroupServiceFactory.make()).getAllGroups();
     return groups;
   }
 
@@ -198,7 +232,8 @@ class _GroupsPageState extends State<GroupsPage> {
                         ],
                       )
                     : GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 200,
                           childAspectRatio: 3 / 2,
                           crossAxisSpacing: 20,
@@ -223,28 +258,36 @@ class _GroupsPageState extends State<GroupsPage> {
                           child: ListBody(
                             children: <Widget>[
                               const Text("Add amount of people for this group"),
-                              DropdownButton<int>(
-                                value: _selectedNumber,
-                                hint: const Text("Choose a number"),
-                                icon: const Icon(Icons.arrow_downward),
-                                elevation: 16,
-                                style: const TextStyle(color: Colors.lightBlue),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.lightBlue,
+                              TextFormField(
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                                initialValue: null,
+                                decoration: const InputDecoration(
+                                  hintText: "Choose a number",
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.deepPurpleAccent),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.deepPurpleAccent),
+                                  ),
                                 ),
-                                onChanged: (int? newValue) {
+                                onChanged: (newValue) {
                                   setStateForDialog(() {
-                                    _selectedNumber = newValue!;
+                                    int? integer = 0;
+                                    if (int.tryParse(newValue) != null) {
+                                      integer = int.tryParse(newValue)!;
+                                    }
+                                    _selectedNumber = integer;
+                                    if (_selectedNumber! > 99) {
+                                      _selectedNumber = 99;
+                                    }
                                   });
                                 },
-                                items: _numbers.map((number) {
-                                  return DropdownMenuItem(
-                                    child: Text(number.toString()),
-                                    value: number,
-                                  );
-                                }).toList(),
-                              ),
+                              )
                             ],
                           ),
                         ),
@@ -262,6 +305,9 @@ class _GroupsPageState extends State<GroupsPage> {
                               addNewGroup(_selectedNumber);
                               _selectedNumber = null;
                               Navigator.of(context).pop();
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const GroupPage(),
+                              ));
                             },
                           ),
                         ],
@@ -277,7 +323,8 @@ class _GroupsPageState extends State<GroupsPage> {
         }
 
         if (snapshot.hasError) {
-          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
+          if (snapshot.error is DioError &&
+              (snapshot.error as DioError).response?.statusCode == 401) {
             BearerTokenFactory.make().then(
               (bearerTokenService) {
                 bearerTokenService.deleteBearerToken();
@@ -286,7 +333,8 @@ class _GroupsPageState extends State<GroupsPage> {
                   screen: const LoginPage(),
                   withNavBar: false,
                   customPageRoute: PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const LoginPage(),
                     transitionDuration: Duration.zero,
                   ),
                 );
