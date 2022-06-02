@@ -16,4 +16,10 @@ class Order {
         products = (json['products'] as List).map((product) => Product.fromJson(product)).toList(),
         createdAt = json['created_at'],
         updatedAt = json['updated_at'];
+
+  String getHourMinutes() {
+    DateTime dt = DateTime.parse(createdAt);
+
+    return dt.hour.toString() + ':' + dt.minute.toString();
+  }
 }
