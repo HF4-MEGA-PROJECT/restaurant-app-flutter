@@ -28,7 +28,7 @@ class _GroupsPageState extends State<GroupsPage> {
       child: const Text("Cancel"),
       onPressed:  () {Navigator.of(context).pop();},
     );
-    Widget launchButton = TextButton(
+    Widget deleteButton = TextButton(
       child: const Text("Delete group"),
       style: TextButton.styleFrom(primary: Colors.red),
       onPressed:  () {deleteGroup(group); Navigator.of(context).pop(); Navigator.of(context).pop();},
@@ -39,7 +39,7 @@ class _GroupsPageState extends State<GroupsPage> {
       content: const Text("Pressing on 'Delete group' will remove this group permanently"),
       actions: [
         cancelButton,
-        launchButton,
+        deleteButton,
       ],
     );
 
