@@ -1,8 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:restaurant_app_flutter/factories/auth_service_factory.dart';
 import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/services/auth.dart';
 import 'package:restaurant_app_flutter/services/bearer_token.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   final String bearerToken;
@@ -52,6 +55,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(const Duration(), () => SystemChannels.textInput.invokeMethod('TextInput.hide'));
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -69,8 +74,10 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   TextFormField(
+                    autofocus: true,
                     decoration: const InputDecoration(
-                      hintText: 'Enter the bearer token or scan the qr code',
+                      labelText: 'Device token',
+                      hintText: 'Enter or scan a device token',
                     ),
                     initialValue: bearerToken,
                     onChanged: (value) {
@@ -80,6 +87,33 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ),
                   const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            style: const TextStyle(color: Colors.blue),
+                            text: "Click here",
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () async {
+                                Uri url = Uri.parse('https://restaurant-backend.binau.dev/user/device-tokens');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                } else {
+                                  throw 'Could not launch $url';
+                                }
+                              },
+                          ),
+                          const TextSpan(
+                            style: TextStyle(color: Colors.grey),
+                            text: " to create a device token.",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: _submitForm,
                     child: const Text('Log in'),
