@@ -20,6 +20,36 @@ class GroupsPage extends StatefulWidget {
 class _GroupsPageState extends State<GroupsPage> {
   int? _selectedNumber;
 
+  showDeleteAlertDialog(BuildContext context, Group group) {
+
+    Widget cancelButton = TextButton(
+      child: const Text("Cancel"),
+      onPressed:  () {Navigator.of(context).pop();},
+    );
+    Widget deleteButton = TextButton(
+      child: const Text("Delete group"),
+      style: TextButton.styleFrom(primary: Colors.red),
+      onPressed:  () {deleteGroup(group); Navigator.of(context).pop(); Navigator.of(context).pop();},
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: const Text("Notice"),
+      content: const Text("Pressing on 'Delete group' will remove this group permanently"),
+      actions: [
+        cancelButton,
+        deleteButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   Widget _group(BuildContext context, Group group) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(10)),
@@ -142,7 +172,8 @@ class _GroupsPageState extends State<GroupsPage> {
                       ),
                     ),
                     ElevatedButton(
-                        onPressed: () => {deleteGroup(group), Navigator.of(context).pop()},
+                        onPressed: ()
+                            {showDeleteAlertDialog(context, group);},
                         child: Text("Delete group ${group.number}")),
                   ],
                 ),
@@ -152,7 +183,6 @@ class _GroupsPageState extends State<GroupsPage> {
         );
       },
     );
-
     return const Center(child: CircularProgressIndicator());
   }
 
