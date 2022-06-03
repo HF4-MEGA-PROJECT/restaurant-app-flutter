@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
+import 'package:restaurant_app_flutter/factories/order_product_service_factory.dart';
 import 'package:restaurant_app_flutter/factories/order_service_factory.dart';
 import 'package:restaurant_app_flutter/models/order.dart';
 import 'package:restaurant_app_flutter/models/order_product.dart';
@@ -35,10 +36,7 @@ class _KitchenPageState extends State<KitchenPage> {
           for (var order in snapshot.data!) {
             orderWidgets.add(
               KitchenOrder(
-                onDeletion: () {
-                  print('deleting...');
-                  setState(() {});
-                },
+                onDeletion: () => setState(() {}),
                 order: order,
               ),
             );
@@ -52,22 +50,33 @@ class _KitchenPageState extends State<KitchenPage> {
               body: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: RefreshIndicator(
-                  onRefresh: () async => setState(() {
-                    print('refreshing');
-                  }),
-                  child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 400,
-                      crossAxisSpacing: 40,
-                      mainAxisSpacing: 40,
-                    ),
-                    itemCount: orderWidgets.length,
-                    itemBuilder: (BuildContext ctx, index) {
-                      return StatefulBuilder(
-                        builder: (context, setState) => orderWidgets[index],
-                      );
-                    },
-                  ),
+                  onRefresh: () async => setState(() {}),
+                  child: orderWidgets.isEmpty
+                      ? Stack(
+                          children: <Widget>[
+                            ListView(
+                              children: const [
+                                Text(
+                                  'No orders, pull down to refresh',
+                                  style: TextStyle(fontSize: 40),
+                                )
+                              ],
+                            ),
+                          ],
+                        )
+                      : GridView.builder(
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 400,
+                            crossAxisSpacing: 40,
+                            mainAxisSpacing: 40,
+                          ),
+                          itemCount: orderWidgets.length,
+                          itemBuilder: (BuildContext ctx, index) {
+                            return StatefulBuilder(
+                              builder: (context, setState) => orderWidgets[index],
+                            );
+                          },
+                        ),
                 ),
               ),
             ),
@@ -214,7 +223,7 @@ class _KitchenOrderState extends State<KitchenOrder> {
                 scale: 1.6,
                 child: Checkbox(
                   value: checked,
-                  onChanged: (value) {
+                  onChanged: (value) async {
                     setState(() {
                       for (var orderProduct in orderProducts) {
                         if (value!) {
@@ -224,6 +233,10 @@ class _KitchenOrderState extends State<KitchenOrder> {
                         }
                       }
                     });
+
+                    for (var orderProduct in orderProducts) {
+                      await (await OrderProductServiceFactory.make()).updateOrderProduct(orderProduct);
+                    }
                   },
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                   activeColor: Colors.red.shade800,
@@ -243,7 +256,7 @@ class _KitchenOrderState extends State<KitchenOrder> {
     bool checked = true;
 
     for (var orderProduct in orderProducts) {
-      if (orderProduct.status == 'ordered') {
+      if (orderProduct.status != 'deliverable') {
         checked = false;
         break;
       }
