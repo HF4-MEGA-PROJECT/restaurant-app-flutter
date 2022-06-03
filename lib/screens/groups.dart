@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -250,7 +248,7 @@ class _GroupsPageState extends State<GroupsPage> {
                           ListView(
                             children: const [
                               Text(
-                                'No groups yet \n Pull down to refresh',
+                                'No groups yet, pull down to refresh',
                                 style: TextStyle(fontSize: 40),
                               )
                             ],
