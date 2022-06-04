@@ -18,8 +18,6 @@ class KitchenPage extends StatefulWidget {
 }
 
 class _KitchenPageState extends State<KitchenPage> {
-  List<Order>? pendingOrders;
-
   Future<List<Order>> getPendingOrders() async {
     OrderService orderService = (await OrderServiceFactory.make());
     return await orderService.getOrders();
@@ -35,7 +33,7 @@ class _KitchenPageState extends State<KitchenPage> {
 
           for (var order in snapshot.data!) {
             orderWidgets.add(
-              KitchenOrder(
+              KitchenOrderWidget(
                 onDeletion: () => setState(() {}),
                 order: order,
               ),
@@ -108,17 +106,17 @@ class _KitchenPageState extends State<KitchenPage> {
   }
 }
 
-class KitchenOrder extends StatefulWidget {
+class KitchenOrderWidget extends StatefulWidget {
   final Order order;
   final Function onDeletion;
 
-  const KitchenOrder({Key? key, required this.onDeletion, required this.order}) : super(key: key);
+  const KitchenOrderWidget({Key? key, required this.onDeletion, required this.order}) : super(key: key);
 
   @override
-  State<KitchenOrder> createState() => _KitchenOrderState();
+  State<KitchenOrderWidget> createState() => _KitchenOrderWidgetState();
 }
 
-class _KitchenOrderState extends State<KitchenOrder> {
+class _KitchenOrderWidgetState extends State<KitchenOrderWidget> {
   @override
   Widget build(BuildContext context) {
     bool allChecked = isChecked(widget.order.orderProducts);

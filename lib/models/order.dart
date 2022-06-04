@@ -31,4 +31,14 @@ class Order {
 
     return dt.hour.toString() + ':' + dt.minute.toString();
   }
+
+  double totalPrice() {
+    double totalPrice = 0;
+
+    for (var orderProduct in orderProducts) {
+      totalPrice += orderProduct.priceAtPurchase;
+    }
+
+    return totalPrice;
+  }
 }

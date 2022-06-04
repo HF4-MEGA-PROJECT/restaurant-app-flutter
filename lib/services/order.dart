@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:restaurant_app_flutter/models/group.dart';
 import 'package:restaurant_app_flutter/models/order.dart';
 
 import '../models/group.dart';
@@ -23,19 +24,17 @@ class OrderService {
     }
   }
 
-  Future<List<Order>> getOrdersForGroup(Group group) async {
+  Future<List<Order>> getGroupOrders(Group group) async {
     try {
-      // TODO: GET ORDERS BY GROUP ID
+      //TODO: When deployed on binau's server
+      //var response = await dio.get('/group/' + group.id.toString() + '/orders');
       var response = await dio.get('/orders');
 
-      var list = (response.data as List).map((order) {
+      return (response.data as List).map((order) {
         return Order.fromJson(order);
       }).toList();
-
-      for (var element in list) {log(element.id.toString());}
-      return list;
     } catch (e) {
-      log('Failed getting orders!', error: e);
+      log('Failed getting group orders!', error: e);
       rethrow;
     }
   }
