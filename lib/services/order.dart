@@ -26,9 +26,7 @@ class OrderService {
 
   Future<List<Order>> getGroupOrders(Group group) async {
     try {
-      //TODO: When deployed on binau's server
-      //var response = await dio.get('/group/' + group.id.toString() + '/orders');
-      var response = await dio.get('/orders');
+      var response = await dio.get('/group/' + group.id.toString() + '/orders');
 
       return (response.data as List).map((order) {
         return Order.fromJson(order);
