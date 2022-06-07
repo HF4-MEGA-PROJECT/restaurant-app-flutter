@@ -9,12 +9,15 @@ class GroupService {
 
   GroupService(this.dio);
 
-  Future<void> createGroup(Group group) async {
+  Future<Group> createGroup(Group group) async {
     try {
       String json = jsonEncode(group);
 
-      await dio.post('/group', data: json);
+      var response = (await dio.post('/group', data: json));
+      
+      Group newGroup = Group.fromJson(response.data);
 
+      return newGroup;
     } catch (e) {
       log('Failed creating group!', error: e);
       rethrow;

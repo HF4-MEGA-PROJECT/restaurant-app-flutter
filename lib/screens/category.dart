@@ -91,11 +91,11 @@ class _CategoryPageState extends State<CategoryPage> {
               body: Padding(
                 padding: const EdgeInsets.all(8),
                 child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200,
                     childAspectRatio: 3 / 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
                   ),
                   itemBuilder: (BuildContext context, int index) {
                     return categoryWidgets[index];
