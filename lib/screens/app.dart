@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/screens/account.dart';
+import 'package:restaurant_app_flutter/screens/bar.dart';
 import 'package:restaurant_app_flutter/screens/groups.dart';
 import 'package:restaurant_app_flutter/screens/kitchen.dart';
 
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
 
-  final PersistentTabController _controller = PersistentTabController(initialIndex: 0);
+  final PersistentTabController _controller =
+      PersistentTabController(initialIndex: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,12 @@ class App extends StatelessWidget {
   }
 
   List<Widget> _buildScreens() {
-    return [const GroupsPage(), const KitchenPage(), const AccountPage()];
+    return [
+      const GroupsPage(),
+      const KitchenPage(),
+      const BarPage(),
+      const AccountPage()
+    ];
   }
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
@@ -45,8 +52,14 @@ class App extends StatelessWidget {
         inactiveColorPrimary: Colors.white,
       ),
       PersistentBottomNavBarItem(
-        icon: const Icon(Icons.kitchen),
+        icon: const Icon(Icons.ballot_outlined),
         title: ("Kitchen"),
+        activeColorPrimary: Colors.red,
+        inactiveColorPrimary: Colors.white,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.kitchen),
+        title: ("Bar"),
         activeColorPrimary: Colors.red,
         inactiveColorPrimary: Colors.white,
       ),
