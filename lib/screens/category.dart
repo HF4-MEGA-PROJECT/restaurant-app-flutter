@@ -60,7 +60,7 @@ class _CategoryPageState extends State<CategoryPage> {
       },
     );
 
-    AlertDialog cum = AlertDialog(
+    AlertDialog alertButtons = AlertDialog(
       actions: [
         create,
         closeButton,
