@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -15,6 +16,17 @@ class OrderProductService {
       return (response.data as List).map((orderProduct) => OrderProduct.fromJson(orderProduct)).toList();
     } catch (e) {
       log('Failed getting order products!', error: e);
+      rethrow;
+    }
+  }
+
+  Future<void> updateOrderProduct(OrderProduct orderProduct) async {
+    try {
+      String json = jsonEncode(orderProduct);
+
+      await dio.put('/order_product/${orderProduct.id}', data: json);
+    } catch (e) {
+      log('Failed editing order product!', error: e);
       rethrow;
     }
   }

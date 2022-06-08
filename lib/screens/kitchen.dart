@@ -2,42 +2,39 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
+import 'package:restaurant_app_flutter/factories/order_product_service_factory.dart';
 import 'package:restaurant_app_flutter/factories/order_service_factory.dart';
-import 'package:restaurant_app_flutter/models/group.dart';
 import 'package:restaurant_app_flutter/models/order.dart';
+import 'package:restaurant_app_flutter/models/order_product.dart';
 import 'package:restaurant_app_flutter/models/product.dart';
-import 'package:restaurant_app_flutter/screens/category.dart';
-
-import '../factories/order_service_factory.dart';
 import 'package:restaurant_app_flutter/screens/login.dart';
 import 'package:restaurant_app_flutter/services/order.dart';
 
-class GroupPage extends StatefulWidget {
-  final Group group;
-
-  const GroupPage({required this.group, Key? key}) : super(key: key);
+class KitchenPage extends StatefulWidget {
+  const KitchenPage({Key? key}) : super(key: key);
 
   @override
-  State<GroupPage> createState() => _GroupPageState();
+  State<KitchenPage> createState() => _KitchenPageState();
 }
 
-class _GroupPageState extends State<GroupPage> {
-  Future<List<Order>> getGroupOrders() async {
+class _KitchenPageState extends State<KitchenPage> {
+  Future<List<Order>> getPendingOrders() async {
     OrderService orderService = (await OrderServiceFactory.make());
-    return await orderService.getGroupOrders(widget.group);
+    return await orderService.getOrders();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Order>>(
-      future: getGroupOrders(),
+      future: getPendingOrders(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<Widget> orderWidgets = <Widget>[];
 
           for (var order in snapshot.data!) {
             orderWidgets.add(
-              OrderWidget(
+              KitchenOrderWidget(
+                onDeletion: () => setState(() {}),
                 order: order,
               ),
             );
@@ -46,7 +43,7 @@ class _GroupPageState extends State<GroupPage> {
           return SafeArea(
             child: Scaffold(
               appBar: AppBar(
-                title: Text('Orders for group ${widget.group.number}'),
+                title: const Text('Kitchen orders'),
               ),
               body: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -80,15 +77,6 @@ class _GroupPageState extends State<GroupPage> {
                         ),
                 ),
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const CategoryPage(),
-                  ),
-                ),
-                tooltip: 'Add order',
-                child: const Icon(Icons.add),
-              ),
             ),
           );
         }
@@ -118,18 +106,21 @@ class _GroupPageState extends State<GroupPage> {
   }
 }
 
-class OrderWidget extends StatefulWidget {
+class KitchenOrderWidget extends StatefulWidget {
   final Order order;
+  final Function onDeletion;
 
-  const OrderWidget({Key? key, required this.order}) : super(key: key);
+  const KitchenOrderWidget({Key? key, required this.onDeletion, required this.order}) : super(key: key);
 
   @override
-  State<OrderWidget> createState() => _OrderWidgetState();
+  State<KitchenOrderWidget> createState() => _KitchenOrderWidgetState();
 }
 
-class _OrderWidgetState extends State<OrderWidget> {
+class _KitchenOrderWidgetState extends State<KitchenOrderWidget> {
   @override
   Widget build(BuildContext context) {
+    bool allChecked = isChecked(widget.order.orderProducts);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.red.shade900,
@@ -177,18 +168,18 @@ class _OrderWidgetState extends State<OrderWidget> {
                 child: Column(
                   children: [
                     ...getProductTexts(),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Text(
-                          'Total: ${widget.order.totalPrice().round().toString()},-',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                    if (allChecked)
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(primary: Colors.green),
+                            onPressed: () => widget.onDeletion(),
+                            icon: const Icon(Icons.check),
+                            label: const Text('Finish'),
                           ),
                         ),
-                      ),
-                    ),
+                      )
                   ],
                 ),
               ),
@@ -211,9 +202,13 @@ class _OrderWidgetState extends State<OrderWidget> {
     productIdToCountMap.forEach((productId, count) {
       Product product = widget.order.getProducts().where((product) => product.id == productId).first;
 
+      List<OrderProduct> orderProducts =
+          widget.order.orderProducts.where((orderProduct) => orderProduct.productId == productId).toList();
+
+      bool checked = isChecked(orderProducts);
+
       textWidgets.add(
         Container(
-          padding: const EdgeInsets.only(bottom: 8, top: 8),
           child: Row(
             children: [
               Expanded(
@@ -222,9 +217,28 @@ class _OrderWidgetState extends State<OrderWidget> {
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
-              Text(
-                (product.price * count).round().toString() + ',-',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Transform.scale(
+                scale: 1.6,
+                child: Checkbox(
+                  value: checked,
+                  onChanged: (value) async {
+                    setState(() {
+                      for (var orderProduct in orderProducts) {
+                        if (value!) {
+                          orderProduct.status = 'deliverable';
+                        } else {
+                          orderProduct.status = 'ordered';
+                        }
+                      }
+                    });
+
+                    for (var orderProduct in orderProducts) {
+                      await (await OrderProductServiceFactory.make()).updateOrderProduct(orderProduct);
+                    }
+                  },
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  activeColor: Colors.red.shade800,
+                ),
               ),
             ],
           ),
@@ -234,5 +248,18 @@ class _OrderWidgetState extends State<OrderWidget> {
     });
 
     return textWidgets;
+  }
+
+  bool isChecked(List<OrderProduct> orderProducts) {
+    bool checked = true;
+
+    for (var orderProduct in orderProducts) {
+      if (orderProduct.status != 'deliverable') {
+        checked = false;
+        break;
+      }
+    }
+
+    return checked;
   }
 }

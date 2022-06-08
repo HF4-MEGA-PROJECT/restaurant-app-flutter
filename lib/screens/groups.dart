@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +20,42 @@ class GroupsPage extends StatefulWidget {
 class _GroupsPageState extends State<GroupsPage> {
   int? _selectedNumber;
 
+  showDeleteAlertDialog(BuildContext context, Group group) {
+    Widget cancelButton = TextButton(
+      child: const Text("Cancel"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+    Widget deleteButton = TextButton(
+      child: const Text("Delete group"),
+      style: TextButton.styleFrom(primary: Colors.red),
+      onPressed: () {
+        deleteGroup(group);
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: const Text("Notice"),
+      content: const Text(
+          "Pressing on 'Delete group' will remove this group permanently"),
+      actions: [
+        cancelButton,
+        deleteButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   Widget _group(BuildContext context, Group group) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(10)),
@@ -34,7 +68,8 @@ class _GroupsPageState extends State<GroupsPage> {
             child: Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                  color: Colors.white, shape: BoxShape.circle),
               child: Center(
                 child: Text(
                   '${group.number}',
@@ -79,7 +114,8 @@ class _GroupsPageState extends State<GroupsPage> {
               content: SingleChildScrollView(
                 child: ListBody(
                   children: [
-                    const Text("Edit amount of people", textAlign: TextAlign.center),
+                    const Text("Edit amount of people",
+                        textAlign: TextAlign.center),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 25),
                       child: Row(
@@ -91,15 +127,19 @@ class _GroupsPageState extends State<GroupsPage> {
                               key: _formKey,
                               child: TextFormField(
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 initialValue: group.amountOfPeople.toString(),
                                 decoration: const InputDecoration(
                                   hintText: "Choose a number",
                                   enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                    borderSide: BorderSide(
+                                        color: Colors.deepPurpleAccent),
                                   ),
                                   focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                    borderSide: BorderSide(
+                                        color: Colors.deepPurpleAccent),
                                   ),
                                 ),
                                 onSaved: (newValue) {
@@ -126,7 +166,8 @@ class _GroupsPageState extends State<GroupsPage> {
                                 _formKey.currentState?.save();
                               },
                               child: const Text("Confirm"),
-                              style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.lightBlue),
                             ),
                           )
                         ],
@@ -137,14 +178,17 @@ class _GroupsPageState extends State<GroupsPage> {
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.of(context).pop();
-                          await goToOrdersForGroup();
+                          await goToOrdersForGroup(group);
                         },
                         child: Text("Go to orders for group ${group.number}"),
-                        style: ElevatedButton.styleFrom(primary: Colors.lightBlue),
+                        style:
+                            ElevatedButton.styleFrom(primary: Colors.lightBlue),
                       ),
                     ),
                     ElevatedButton(
-                        onPressed: () => {deleteGroup(group), Navigator.of(context).pop()},
+                        onPressed: () {
+                          showDeleteAlertDialog(context, group);
+                        },
                         child: Text("Delete group ${group.number}")),
                   ],
                 ),
@@ -154,26 +198,27 @@ class _GroupsPageState extends State<GroupsPage> {
         );
       },
     );
-
     return const Center(child: CircularProgressIndicator());
   }
 
-  Future<void> addNewGroup(int? amountOfPeople) async {
+  Future<Group> addNewGroup(int? amountOfPeople) async {
     try {
       amountOfPeople ??= 1;
       var group = Group(null, amountOfPeople, null, null, null, null);
 
-      await (await GroupServiceFactory.make()).createGroup(group);
+      Group newGroup = await (await GroupServiceFactory.make()).createGroup(group);
 
       setState(() {});
+      return newGroup;
     } catch (e) {
       developer.log('Failed adding new group!', error: e);
       rethrow;
     }
   }
 
-  Future<void> goToOrdersForGroup() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const GroupPage()));
+  Future<void> goToOrdersForGroup(Group group) async {
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => GroupPage(group: group)));
   }
 
   Future<void> deleteGroup(Group group) async {
@@ -187,7 +232,8 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Future<List<Group>> getGroups() async {
-    List<Group> groups = await (await GroupServiceFactory.make()).getAllGroups();
+    List<Group> groups =
+        await (await GroupServiceFactory.make()).getAllGroups();
     return groups;
   }
 
@@ -220,7 +266,7 @@ class _GroupsPageState extends State<GroupsPage> {
                           ListView(
                             children: const [
                               Text(
-                                'No groups yet \n Pull down to refresh',
+                                'No groups yet, pull down to refresh',
                                 style: TextStyle(fontSize: 40),
                               )
                             ],
@@ -228,7 +274,8 @@ class _GroupsPageState extends State<GroupsPage> {
                         ],
                       )
                     : GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 200,
                           childAspectRatio: 3 / 2,
                           crossAxisSpacing: 20,
@@ -255,15 +302,19 @@ class _GroupsPageState extends State<GroupsPage> {
                               const Text("Add amount of people for this group"),
                               TextFormField(
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 initialValue: null,
                                 decoration: const InputDecoration(
                                   hintText: "Choose a number",
                                   enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                    borderSide: BorderSide(
+                                        color: Colors.deepPurpleAccent),
                                   ),
                                   focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                                    borderSide: BorderSide(
+                                        color: Colors.deepPurpleAccent),
                                   ),
                                 ),
                                 onChanged: (newValue) {
@@ -292,12 +343,14 @@ class _GroupsPageState extends State<GroupsPage> {
                           ),
                           TextButton(
                             child: const Text('Add group'),
-                            onPressed: () {
-                              addNewGroup(_selectedNumber);
+                            onPressed: () async {
+                              Group newGroup =
+                                  await addNewGroup(_selectedNumber);
                               _selectedNumber = null;
                               Navigator.of(context).pop();
                               Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const GroupPage(),
+                                builder: (context) =>
+                                    GroupPage(group: newGroup),
                               ));
                             },
                           ),
@@ -314,7 +367,8 @@ class _GroupsPageState extends State<GroupsPage> {
         }
 
         if (snapshot.hasError) {
-          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
+          if (snapshot.error is DioError &&
+              (snapshot.error as DioError).response?.statusCode == 401) {
             BearerTokenFactory.make().then(
               (bearerTokenService) {
                 bearerTokenService.deleteBearerToken();
@@ -323,7 +377,8 @@ class _GroupsPageState extends State<GroupsPage> {
                   screen: const LoginPage(),
                   withNavBar: false,
                   customPageRoute: PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const LoginPage(),
                     transitionDuration: Duration.zero,
                   ),
                 );
