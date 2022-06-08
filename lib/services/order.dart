@@ -11,15 +11,28 @@ class OrderService {
 
   OrderService(this.dio);
 
-  Future<List<Order>> getOrders() async {
+  Future<List<Order>> getKitchenOrders() async {
     try {
-      var response = await dio.get('/orders');
+      var response = await dio.get('/orders/kitchen');
 
       return (response.data as List).map((order) {
         return Order.fromJson(order);
       }).toList();
     } catch (e) {
-      log('Failed getting orders!', error: e);
+      log('Failed getting kitchen orders!', error: e);
+      rethrow;
+    }
+  }
+
+  Future<List<Order>> getBarOrders() async {
+    try {
+      var response = await dio.get('/orders/bar');
+
+      return (response.data as List).map((order) {
+        return Order.fromJson(order);
+      }).toList();
+    } catch (e) {
+      log('Failed getting bar orders!', error: e);
       rethrow;
     }
   }

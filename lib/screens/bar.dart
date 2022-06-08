@@ -10,17 +10,17 @@ import 'package:restaurant_app_flutter/models/product.dart';
 import 'package:restaurant_app_flutter/screens/login.dart';
 import 'package:restaurant_app_flutter/services/order.dart';
 
-class KitchenPage extends StatefulWidget {
-  const KitchenPage({Key? key}) : super(key: key);
+class BarPage extends StatefulWidget {
+  const BarPage({Key? key}) : super(key: key);
 
   @override
-  State<KitchenPage> createState() => _KitchenPageState();
+  State<BarPage> createState() => _BarPageState();
 }
 
-class _KitchenPageState extends State<KitchenPage> {
+class _BarPageState extends State<BarPage> {
   Future<List<Order>> getPendingOrders() async {
     OrderService orderService = (await OrderServiceFactory.make());
-    return await orderService.getKitchenOrders();
+    return await orderService.getBarOrders();
   }
 
   @override
@@ -33,7 +33,7 @@ class _KitchenPageState extends State<KitchenPage> {
 
           for (var order in snapshot.data!) {
             orderWidgets.add(
-              KitchenOrderWidget(
+              BarOrderWidget(
                 onDeletion: () => setState(() {}),
                 order: order,
               ),
@@ -43,7 +43,7 @@ class _KitchenPageState extends State<KitchenPage> {
           return SafeArea(
             child: Scaffold(
               appBar: AppBar(
-                title: const Text('Kitchen orders'),
+                title: const Text('Bar orders'),
               ),
               body: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -110,19 +110,19 @@ class _KitchenPageState extends State<KitchenPage> {
   }
 }
 
-class KitchenOrderWidget extends StatefulWidget {
+class BarOrderWidget extends StatefulWidget {
   final Order order;
   final Function onDeletion;
 
-  const KitchenOrderWidget(
+  const BarOrderWidget(
       {Key? key, required this.onDeletion, required this.order})
       : super(key: key);
 
   @override
-  State<KitchenOrderWidget> createState() => _KitchenOrderWidgetState();
+  State<BarOrderWidget> createState() => _BarOrderWidgetState();
 }
 
-class _KitchenOrderWidgetState extends State<KitchenOrderWidget> {
+class _BarOrderWidgetState extends State<BarOrderWidget> {
   @override
   Widget build(BuildContext context) {
     bool allChecked = isChecked(widget.order.orderProducts);
