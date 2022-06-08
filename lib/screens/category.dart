@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/factories/category_service_factory.dart';
+import 'package:restaurant_app_flutter/factories/order_product_service_factory.dart';
 import 'package:restaurant_app_flutter/factories/product_service_factory.dart';
 import 'package:restaurant_app_flutter/models/category.dart';
 import 'package:restaurant_app_flutter/models/group.dart';
+import 'package:restaurant_app_flutter/models/order.dart';
 
+import '../factories/order_service_factory.dart';
 import '../models/product.dart';
 import 'login.dart';
 
@@ -19,6 +22,72 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   Category? currentCategory;
+  int? orderId;
+
+  showAlertDialog(BuildContext context, List<Product> products, Group group) {
+    // set up the button
+    Widget cancelButton = TextButton(
+      child: const Text("Cancel order", style: TextStyle(fontSize: 12)),
+      style: TextButton.styleFrom(
+        primary: Colors.red,
+      ),
+      onPressed: () {
+        order.clear();
+        Navigator.of(context, rootNavigator: true).pop();
+      },
+    );
+
+    Widget closeButton = TextButton(
+      child: const Text("Close window", style: TextStyle(fontSize: 12)),
+      style: TextButton.styleFrom(primary: Colors.grey),
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true).pop();
+      },
+    );
+
+    Widget create = TextButton(
+      child: const Text("Confirm order", style: TextStyle(fontSize: 12)),
+      style: TextButton.styleFrom(
+        primary: Colors.blue,
+      ),
+      onPressed: () async {
+        orderId = await createOrder(group.id!);
+        order.forEach((element) {
+          createOrderProduct(orderId!, element);
+        });
+        order.clear();
+        Navigator.of(context, rootNavigator: true).pop();
+      },
+    );
+
+    AlertDialog alertButtons = AlertDialog(
+      actions: [
+        create,
+        closeButton,
+        cancelButton,
+      ],
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("Items in this order"),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[for (var value in products) Text(value.name)],
+        ),
+      ),
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ListView(
+          children: <Widget>[Flexible(child: alert), Flexible(child: alertButtons)],
+        );
+      },
+    );
+  }
 
   Future<void> goBackToCategoryRoot() async {
     setState(() {
@@ -38,10 +107,13 @@ class _CategoryPageState extends State<CategoryPage> {
       return false;
     }
 
-    List<Category> categoryList = await (await CategoryServiceFactory.make()).getAllCategories();
+    List<Category> categoryList =
+        await (await CategoryServiceFactory.make()).getAllCategories();
 
     setState(() {
-      currentCategory = categoryList.where(((element) => element.id == currentCategory!.categoryId)).first;
+      currentCategory = categoryList
+          .where(((element) => element.id == currentCategory!.categoryId))
+          .first;
     });
 
     return false;
@@ -49,38 +121,61 @@ class _CategoryPageState extends State<CategoryPage> {
 
   Future<List<Category>> getCategories() async {
     if (currentCategory == null) {
-      List<Category> categoryList = await (await CategoryServiceFactory.make()).getAllCategories();
-      return categoryList.where((element) => element.categoryId == null).toList();
+      List<Category> categoryList =
+          await (await CategoryServiceFactory.make()).getAllCategories();
+      return categoryList
+          .where((element) => element.categoryId == null)
+          .toList();
     }
-    return await (await CategoryServiceFactory.make()).getAllCategoriesById(currentCategory!.id);
+    return await (await CategoryServiceFactory.make())
+        .getAllCategoriesById(currentCategory!.id);
   }
 
   Future<List<Product>> getProducts() async {
-      List<Product> productList = await (await ProductServiceFactory.make()).getAllProducts();
-      if(currentCategory == null){
-        return productList.where((element) => element.categoryId == null).toList();
-      }
-      return productList.where((element) => element.categoryId == currentCategory!.id).toList();
+    List<Product> productList =
+        await (await ProductServiceFactory.make()).getAllProducts();
+    if (currentCategory == null) {
+      return productList
+          .where((element) => element.categoryId == null)
+          .toList();
+    }
+    return productList
+        .where((element) => element.categoryId == currentCategory!.id)
+        .toList();
   }
 
-  Future<Map<String,dynamic>> getProductsAndCategories() async{
-    Map<String,dynamic> productsAndCategories = {
+  Future<Map<String, dynamic>> getProductsAndCategories() async {
+    Map<String, dynamic> productsAndCategories = {
       "products": await getProducts(),
       "categories": await getCategories()
     };
     return productsAndCategories;
   }
 
-  List<int> orders = [];
+  List<Product> order = [];
 
-  void _onClick(int value){
-    orders.add(value);
-    print(orders);
+  void _addProducts(Product product) {
+    order.add(product);
+    print(order);
+  }
+
+  Future<int> createOrder(int groupId) async {
+    return await (await OrderServiceFactory.make()).createOrder(groupId);
+  }
+
+  Future<void> createOrderProduct(int orderId, Product product) async {
+    await (await OrderProductServiceFactory.make())
+        .createOrderProduct(orderId, product.id, product.price);
+  }
+
+  void _removeProductFromList(int productId) {
+    order.removeWhere((productId) => productId == 9);
+    print(order);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String,dynamic>>(
+    return FutureBuilder<Map<String, dynamic>>(
       future: getProductsAndCategories(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -99,27 +194,27 @@ class _CategoryPageState extends State<CategoryPage> {
                   },
                   child: Text(
                     element.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 25),
                   ),
                 ),
               );
             },
           );
           products.forEach(
-                (element) {
+            (element) {
               productWidgets.add(
                 ElevatedButton(
-                  onPressed: () => _onClick(element.id),
+                  onPressed: () => _addProducts(element),
                   child: Text(
                     element.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 25),
                   ),
                 ),
               );
             },
           );
-
-          print(products.length.toString());
 
           List<Widget> Widgets = [];
           Widgets.addAll(categoryWidgets);
@@ -130,6 +225,15 @@ class _CategoryPageState extends State<CategoryPage> {
             child: Scaffold(
               appBar: AppBar(
                 title: const Text('Category'),
+                actions: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(right: 20.0),
+                      child: GestureDetector(
+                        onTap: () =>
+                            showAlertDialog(context, order, widget.group),
+                        child: const Icon(Icons.shopping_cart),
+                      )),
+                ],
               ),
               body: Padding(
                 padding: const EdgeInsets.all(8),
@@ -158,7 +262,8 @@ class _CategoryPageState extends State<CategoryPage> {
         }
 
         if (snapshot.hasError) {
-          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
+          if (snapshot.error is DioError &&
+              (snapshot.error as DioError).response?.statusCode == 401) {
             BearerTokenFactory.make().then(
               (bearerTokenService) {
                 bearerTokenService.deleteBearerToken();
@@ -167,7 +272,8 @@ class _CategoryPageState extends State<CategoryPage> {
                   screen: const LoginPage(),
                   withNavBar: false,
                   customPageRoute: PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const LoginPage(),
                     transitionDuration: Duration.zero,
                   ),
                 );

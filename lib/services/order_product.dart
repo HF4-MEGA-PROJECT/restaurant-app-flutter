@@ -30,4 +30,13 @@ class OrderProductService {
       rethrow;
     }
   }
+
+  Future<void> createOrderProduct(int orderId, int productId, double price_at_purchase) async {
+    try {
+      var response = await dio.post('/order_product/' , data: {'order_id':orderId, 'product_id':productId, 'price_at_purchase':price_at_purchase});
+    } catch (e) {
+      log('Failed creating the order!', error: e);
+      rethrow;
+    }
+  }
 }
