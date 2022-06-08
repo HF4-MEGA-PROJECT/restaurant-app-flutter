@@ -76,15 +76,18 @@ class _CategoryPageState extends State<CategoryPage> {
           children: <Widget>[for (var value in products) Text(value.name)],
         ),
       ),
+      actions: [
+        create,
+        closeButton,
+        cancelButton,
+      ],
     );
 
     // show the dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return ListView(
-          children: <Widget>[Flexible(child: alert), Flexible(child: alertButtons)],
-        );
+        return alert;
       },
     );
   }

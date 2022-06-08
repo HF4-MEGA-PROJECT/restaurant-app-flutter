@@ -4,8 +4,8 @@ class DioFactory {
   static Dio make(String bearerToken) {
     Dio dio = Dio(BaseOptions(
       baseUrl: 'https://restaurant-backend.binau.dev/api',
-      connectTimeout: 25000,
-      receiveTimeout: 25000,
+      connectTimeout: 5000,
+      receiveTimeout: 5000,
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + bearerToken
