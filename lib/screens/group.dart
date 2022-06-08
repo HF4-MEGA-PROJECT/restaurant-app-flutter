@@ -66,7 +66,8 @@ class _GroupPageState extends State<GroupPage> {
                           ],
                         )
                       : GridView.builder(
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 400,
                             crossAxisSpacing: 40,
                             mainAxisSpacing: 40,
@@ -74,7 +75,8 @@ class _GroupPageState extends State<GroupPage> {
                           itemCount: orderWidgets.length,
                           itemBuilder: (BuildContext ctx, index) {
                             return StatefulBuilder(
-                              builder: (context, setState) => orderWidgets[index],
+                              builder: (context, setState) =>
+                                  orderWidgets[index],
                             );
                           },
                         ),
@@ -83,7 +85,7 @@ class _GroupPageState extends State<GroupPage> {
               floatingActionButton: FloatingActionButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const CategoryPage(),
+                    builder: (context) => CategoryPage(group: widget.group),
                   ),
                 ),
                 tooltip: 'Add order',
@@ -94,7 +96,8 @@ class _GroupPageState extends State<GroupPage> {
         }
 
         if (snapshot.hasError) {
-          if (snapshot.error is DioError && (snapshot.error as DioError).response?.statusCode == 401) {
+          if (snapshot.error is DioError &&
+              (snapshot.error as DioError).response?.statusCode == 401) {
             BearerTokenFactory.make().then(
               (bearerTokenService) {
                 bearerTokenService.deleteBearerToken();
@@ -103,7 +106,8 @@ class _GroupPageState extends State<GroupPage> {
                   screen: const LoginPage(),
                   withNavBar: false,
                   customPageRoute: PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const LoginPage(),
                     transitionDuration: Duration.zero,
                   ),
                 );
@@ -203,13 +207,17 @@ class _OrderWidgetState extends State<OrderWidget> {
     Map<int, int> productIdToCountMap = {};
 
     for (Product product in widget.order.getProducts()) {
-      productIdToCountMap.update(product.id, (value) => value + 1, ifAbsent: () => 1);
+      productIdToCountMap.update(product.id, (value) => value + 1,
+          ifAbsent: () => 1);
     }
 
     List<Widget> textWidgets = [];
 
     productIdToCountMap.forEach((productId, count) {
-      Product product = widget.order.getProducts().where((product) => product.id == productId).first;
+      Product product = widget.order
+          .getProducts()
+          .where((product) => product.id == productId)
+          .first;
 
       textWidgets.add(
         Container(
@@ -219,16 +227,19 @@ class _OrderWidgetState extends State<OrderWidget> {
               Expanded(
                 child: Text(
                   count.toString() + 'x ' + product.name,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
               Text(
                 (product.price * count).round().toString() + ',-',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          decoration: const BoxDecoration(border: Border(bottom: BorderSide(width: 1.1))),
+          decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(width: 1.1))),
         ),
       );
     });
