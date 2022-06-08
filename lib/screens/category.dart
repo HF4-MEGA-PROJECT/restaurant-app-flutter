@@ -83,7 +83,7 @@ class _CategoryPageState extends State<CategoryPage> {
       context: context,
       builder: (BuildContext context) {
         return ListView(
-          children: <Widget>[Flexible(child: alert), Flexible(child: cum)],
+          children: <Widget>[Flexible(child: alert), Flexible(child: alertButtons)],
         );
       },
     );
