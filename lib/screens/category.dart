@@ -27,7 +27,7 @@ class _CategoryPageState extends State<CategoryPage> {
   showAlertDialog(BuildContext context, List<Product> products, Group group) {
     // set up the button
     Widget cancelButton = TextButton(
-      child: const Text("Cancel order", style: TextStyle(fontSize: 10)),
+      child: const Text("Cancel order", style: TextStyle(fontSize: 12)),
       style: TextButton.styleFrom(
         primary: Colors.red,
       ),
@@ -38,7 +38,7 @@ class _CategoryPageState extends State<CategoryPage> {
     );
 
     Widget closeButton = TextButton(
-      child: const Text("Close window", style: TextStyle(fontSize: 10)),
+      child: const Text("Close window", style: TextStyle(fontSize: 12)),
       style: TextButton.styleFrom(primary: Colors.grey),
       onPressed: () {
         Navigator.of(context, rootNavigator: true).pop();
@@ -46,7 +46,7 @@ class _CategoryPageState extends State<CategoryPage> {
     );
 
     Widget create = TextButton(
-      child: const Text("Confirm order", style: TextStyle(fontSize: 10)),
+      child: const Text("Confirm order", style: TextStyle(fontSize: 12)),
       style: TextButton.styleFrom(
         primary: Colors.blue,
       ),
@@ -61,7 +61,6 @@ class _CategoryPageState extends State<CategoryPage> {
     );
 
     AlertDialog cum = AlertDialog(
-      title: const Text("Notice"),
       actions: [
         create,
         closeButton,
@@ -83,8 +82,8 @@ class _CategoryPageState extends State<CategoryPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return ListBody(
-          children: <Widget>[alert, cum],
+        return ListView(
+          children: <Widget>[Flexible(child: alert), Flexible(child: cum)],
         );
       },
     );
