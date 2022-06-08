@@ -3,25 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:restaurant_app_flutter/factories/bearer_token_factory.dart';
 import 'package:restaurant_app_flutter/factories/category_service_factory.dart';
+import 'package:restaurant_app_flutter/factories/product_service_factory.dart';
 import 'package:restaurant_app_flutter/models/category.dart';
+import 'package:restaurant_app_flutter/models/group.dart';
 
+import '../models/product.dart';
 import 'login.dart';
 
 class CategoryPage extends StatefulWidget {
-  final Category? category;
-  const CategoryPage({Key? key, this.category}) : super(key: key);
+  final Group group;
+  const CategoryPage({Key? key, required this.group}) : super(key: key);
   @override
   State<CategoryPage> createState() => _CategoryPageState();
 }
 
 class _CategoryPageState extends State<CategoryPage> {
   Category? currentCategory;
-
-  @override
-  void initState() {
-    currentCategory = widget.category;
-    super.initState();
-  }
 
   Future<void> goBackToCategoryRoot() async {
     setState(() {
@@ -58,14 +55,40 @@ class _CategoryPageState extends State<CategoryPage> {
     return await (await CategoryServiceFactory.make()).getAllCategoriesById(currentCategory!.id);
   }
 
+  Future<List<Product>> getProducts() async {
+      List<Product> productList = await (await ProductServiceFactory.make()).getAllProducts();
+      if(currentCategory == null){
+        return productList.where((element) => element.categoryId == null).toList();
+      }
+      return productList.where((element) => element.categoryId == currentCategory!.id).toList();
+  }
+
+  Future<Map<String,dynamic>> getProductsAndCategories() async{
+    Map<String,dynamic> productsAndCategories = {
+      "products": await getProducts(),
+      "categories": await getCategories()
+    };
+    return productsAndCategories;
+  }
+
+  List<int> orders = [];
+
+  void _onClick(int value){
+    orders.add(value);
+    print(orders);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Category>>(
-      future: getCategories(),
+    return FutureBuilder<Map<String,dynamic>>(
+      future: getProductsAndCategories(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          List<Category> categories = snapshot.data!["categories"];
+          List<Product> products = snapshot.data!["products"];
           List<Widget> categoryWidgets = <Widget>[];
-          snapshot.data?.forEach(
+          List<Widget> productWidgets = <Widget>[];
+          categories.forEach(
             (element) {
               categoryWidgets.add(
                 ElevatedButton(
@@ -82,6 +105,26 @@ class _CategoryPageState extends State<CategoryPage> {
               );
             },
           );
+          products.forEach(
+                (element) {
+              productWidgets.add(
+                ElevatedButton(
+                  onPressed: () => _onClick(element.id),
+                  child: Text(
+                    element.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                  ),
+                ),
+              );
+            },
+          );
+
+          print(products.length.toString());
+
+          List<Widget> Widgets = [];
+          Widgets.addAll(categoryWidgets);
+          Widgets.addAll(productWidgets);
+
           return WillPopScope(
             onWillPop: _onWillPop,
             child: Scaffold(
@@ -98,9 +141,9 @@ class _CategoryPageState extends State<CategoryPage> {
                     mainAxisSpacing: 10,
                   ),
                   itemBuilder: (BuildContext context, int index) {
-                    return categoryWidgets[index];
+                    return Widgets[index];
                   },
-                  itemCount: categoryWidgets.length,
+                  itemCount: Widgets.length,
                 ),
               ),
               floatingActionButton: currentCategory == null
