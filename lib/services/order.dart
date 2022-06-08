@@ -36,4 +36,14 @@ class OrderService {
       rethrow;
     }
   }
+
+  Future<int> createOrder(int groupId) async {
+    try {
+      var response = await dio.post('/order/' , data: {'group_id':groupId});
+      return response.data["id"];
+    } catch (e) {
+      log('Failed creating the order!', error: e);
+      rethrow;
+    }
+  }
 }
